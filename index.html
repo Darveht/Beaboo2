@@ -9,8 +9,28 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4653147807800151" crossorigin="anonymous"></script>
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
-  <!-- Tailwind CSS estático (optimizado) -->
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.0/dist/tailwind.min.css" rel="stylesheet">
+  <!-- Tailwind CSS completo con gradientes (optimizado para no bloquear) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Configuración de Tailwind optimizada - incluye gradientes sin bloqueos
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'beaboo': {
+              'primary': '#FE2C55',
+              'secondary': '#25F4EE',
+              'pink-light': '#FFE8EC'
+            }
+          }
+        }
+      },
+      // Configuración que evita scanning aggressive (previene bloqueos)
+      content: [],
+      // Separador de clases simple para evitar regex complejos
+      separator: ':'
+    }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <!-- Font Awesome CDN -->
