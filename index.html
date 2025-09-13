@@ -3944,19 +3944,22 @@ document.getElementById('note-content').addEventListener('input', function() {
     <!-- Resultados -->
     <h2 id="search-results-title" class="text-xl font-bold mb-4 text-black">Resultados de búsqueda</h2>
     <div class="flex justify-around border-b border-gray-200 mb-4">
-      <button data-tab="books" class="tab-button py-2 w-1/2 text-center font-medium text-gray-500 hover:text-[#FE2C55] active">
-        Libros
+      <button data-tab="comics" class="tab-button py-2 w-1/3 text-center font-medium text-gray-500 hover:text-[#FE2C55] active">
+        Cómic
       </button>
-      <button data-tab="authors" class="tab-button py-2 w-1/2 text-center font-medium text-gray-500 hover:text-[#FE2C55]">
+      <button data-tab="authors" class="tab-button py-2 w-1/3 text-center font-medium text-gray-500 hover:text-[#FE2C55]">
         Autores
+      </button>
+      <button data-tab="notes" class="tab-button py-2 w-1/3 text-center font-medium text-gray-500 hover:text-[#FE2C55]">
+        Notas
       </button>
     </div>
 
-    <!-- Sección Libros -->
-    <div id="books-section" class="block">
-      <h3 id="search-books-title" class="text-base font-semibold mb-3 text-[#FE2C55]">Libros</h3>
-      <div id="search-books-carousel" class="flex space-x-3 overflow-x-auto mb-6 p-1 scrollbar-hide">
-        <!-- Aquí se cargarán los libros desde Firebase -->
+    <!-- Sección Cómic -->
+    <div id="comics-section" class="block">
+      <h3 id="search-comics-title" class="text-base font-semibold mb-3 text-[#FE2C55]">Cómic</h3>
+      <div id="search-comics-carousel" class="flex space-x-3 overflow-x-auto mb-6 p-1 scrollbar-hide">
+        <!-- Aquí se cargarán los cómics desde Firebase -->
       </div>
     </div>
 
@@ -3965,6 +3968,14 @@ document.getElementById('note-content').addEventListener('input', function() {
       <h3 id="search-authors-title" class="text-base font-semibold mb-3 text-[#FE2C55]">Autores</h3>
       <div id="search-authors-list" class="space-y-3">
         <!-- Aquí se cargarán los autores desde Firebase -->
+      </div>
+    </div>
+
+    <!-- Sección Notas (NUEVA) -->
+    <div id="notes-section" class="hidden">
+      <h3 id="search-notes-title" class="text-base font-semibold mb-3 text-[#FE2C55]">Notas de la Comunidad</h3>
+      <div id="search-notes-list" class="space-y-3">
+        <!-- Aquí se cargarán las notas de la comunidad en tiempo real -->
       </div>
     </div>
   </div>
@@ -3988,16 +3999,16 @@ document.getElementById('note-content').addEventListener('input', function() {
       
       // Mostrar la sección correspondiente
       const tabName = button.getAttribute('data-tab');
-      if (tabName === 'books') {
-        document.getElementById('books-section').classList.remove('hidden');
-        document.getElementById('books-section').classList.add('block');
+      if (tabName === 'comics') {
+        document.getElementById('comics-section').classList.remove('hidden');
+        document.getElementById('comics-section').classList.add('block');
         document.getElementById('authors-section').classList.add('hidden');
         document.getElementById('authors-section').classList.remove('block');
       } else {
         document.getElementById('authors-section').classList.remove('hidden');
         document.getElementById('authors-section').classList.add('block');
-        document.getElementById('books-section').classList.add('hidden');
-        document.getElementById('books-section').classList.remove('block');
+        document.getElementById('comics-section').classList.add('hidden');
+        document.getElementById('comics-section').classList.remove('block');
       }
     });
   });
@@ -4006,7 +4017,7 @@ document.getElementById('note-content').addEventListener('input', function() {
   function performModernSearch(query) {
     const searchLoading = document.getElementById('search-loading');
     const resultsTitle = document.getElementById('search-results-title');
-    const booksSection = document.getElementById('books-section');
+    const comicsSection = document.getElementById('comics-section');
     const authorsSection = document.getElementById('authors-section');
     
     if (!query.trim()) {
@@ -4164,22 +4175,146 @@ document.getElementById('note-content').addEventListener('input', function() {
   }
 </style>
 
-<!-- Script para cambiar entre libros y autores -->
+<!-- Script para cambiar entre cómics, autores y notas -->
 <script>
   document.addEventListener("DOMContentLoaded", function() {
     var tabButtons = document.querySelectorAll('.tab-button');
     tabButtons.forEach(function(button) {
       button.addEventListener('click', function() {
         var tab = button.getAttribute('data-tab');
-        document.getElementById('books-section').classList.toggle('hidden', tab !== 'books');
+        
+        // Ocultar todas las secciones
+        document.getElementById('comics-section').classList.toggle('hidden', tab !== 'comics');
         document.getElementById('authors-section').classList.toggle('hidden', tab !== 'authors');
+        document.getElementById('notes-section').classList.toggle('hidden', tab !== 'notes');
+        
+        // Actualizar estilos de botones
         tabButtons.forEach(function(btn) {
           btn.classList.remove('text-white', 'border-b-2', 'border-[#ff0050]');
         });
         button.classList.add('text-white', 'border-b-2', 'border-[#ff0050]');
+        
+        // Cargar contenido según la sección (NUEVA FUNCIONALIDAD)
+        if (tab === 'notes') {
+          loadCommunityNotes();
+        }
       });
     });
   });
+
+  // NUEVA FUNCIÓN: Cargar notas de la comunidad en tiempo real (CON PREVENCIÓN DE DUPLICADOS)
+  let notesListener = null; // Prevenir listeners duplicados
+  
+  function loadCommunityNotes() {
+    const notesContainer = document.getElementById('search-notes-list');
+    if (!notesContainer) return;
+    
+    // Limpiar contenido anterior
+    notesContainer.innerHTML = '<div class="text-center text-gray-500">Cargando notas...</div>';
+    
+    // Desconectar listener anterior si existe (PREVIENE DUPLICADOS)
+    if (notesListener) {
+      const communityRef = firebase.database().ref('community_posts');
+      communityRef.off('value', notesListener);
+    }
+    
+    // Crear nuevo listener
+    const communityRef = firebase.database().ref('community_posts');
+    notesListener = function(snapshot) {
+      notesContainer.innerHTML = '';
+      
+      if (!snapshot.exists()) {
+        notesContainer.innerHTML = '<div class="text-center text-gray-500">No hay notas en la comunidad</div>';
+        return;
+      }
+      
+      const notes = [];
+      snapshot.forEach(function(childSnapshot) {
+        const note = childSnapshot.val();
+        note.id = childSnapshot.key;
+        notes.push(note);
+      });
+      
+      // Ordenar por fecha más reciente
+      notes.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      
+      // Mostrar las notas
+      notes.forEach(function(note) {
+        const noteElement = document.createElement('div');
+        noteElement.className = 'bg-white p-3 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer';
+        noteElement.innerHTML = `
+          <div class="flex items-start space-x-3">
+            <div class="w-8 h-8 bg-gradient-to-r from-pink-400 to-red-400 rounded-full flex items-center justify-center text-white text-sm font-bold">
+              ${(note.username || 'Usuario').charAt(0).toUpperCase()}
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center space-x-2">
+                <h4 class="font-medium text-gray-900 truncate">${note.username || 'Usuario'}</h4>
+                <span class="text-xs text-gray-500">${formatTimestamp(note.timestamp)}</span>
+              </div>
+              <p class="text-gray-700 mt-1 line-clamp-2"></p>
+              <div class="hashtags-container mt-2 flex flex-wrap gap-1"></div>
+            </div>
+          </div>
+        `;
+        
+        // SEGURIDAD: Usar textContent en lugar de innerHTML para evitar XSS
+        const usernameElements = noteElement.querySelectorAll('h4, .text-white');
+        usernameElements[0].textContent = note.username || 'Usuario';
+        usernameElements[1].textContent = (note.username || 'Usuario').charAt(0).toUpperCase();
+        
+        const contentElement = noteElement.querySelector('p');
+        contentElement.textContent = note.content || 'Sin contenido';
+        
+        // Agregar hashtags de forma segura
+        if (note.hashtags) {
+          const hashtagsContainer = noteElement.querySelector('.hashtags-container');
+          note.hashtags.split(' ').forEach(tag => {
+            if (tag.trim()) {
+              const tagSpan = document.createElement('span');
+              tagSpan.className = 'text-xs bg-pink-100 text-pink-600 px-2 py-1 rounded-full';
+              tagSpan.textContent = tag.trim();
+              hashtagsContainer.appendChild(tagSpan);
+            }
+          });
+        }
+        
+        // Click para abrir la nota completa
+        noteElement.onclick = () => openCommunityNoteDetail(note);
+        
+        notesContainer.appendChild(noteElement);
+      });
+    };
+    
+    // Conectar el nuevo listener
+    communityRef.on('value', notesListener);
+  }
+  
+  // Función para formatear timestamp
+  function formatTimestamp(timestamp) {
+    if (!timestamp) return 'Hace un momento';
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    
+    if (diffMins < 1) return 'Ahora';
+    if (diffMins < 60) return `${diffMins}m`;
+    if (diffHours < 24) return `${diffHours}h`;
+    return `${diffDays}d`;
+  }
+  
+  // Función para abrir detalle de nota de comunidad
+  function openCommunityNoteDetail(note) {
+    // Aquí puedes implementar la vista detallada de la nota
+    console.log('Abriendo nota:', note);
+    // Por ahora, mostrar en el modal de comunidad existente
+    if (typeof showCommunityView === 'function') {
+      showCommunityView();
+    }
+  }
 </script>
 <!-- PERFIL PROPIO CON SUBIDA DE FOTO EN TIEMPO REAL -->
 <div id="profile-view" class="fixed inset-0 overflow-y-auto z-40 hidden bg-white text-black scrollbar-hide">
@@ -11954,7 +12089,7 @@ function saveNote() {
       terror: "Historias de Terror Destacadas",
       searchPlaceholder: "Buscar historias o autores",
       searchResults: "Resultados de búsqueda",
-      searchBooks: "Libros",
+      searchBooks: "Cómic",
       searchAuthors: "Autores",
       profileStories: "Mis Historias",
       editProfile: "Editar nombre",
@@ -12033,7 +12168,7 @@ function saveNote() {
     document.getElementById('terror-title').innerText = translations[currentLanguage].terror;
     document.getElementById('search-input').placeholder = translations[currentLanguage].searchPlaceholder;
     document.getElementById('search-results-title').innerText = translations[currentLanguage].searchResults;
-    document.getElementById('search-books-title').innerText = translations[currentLanguage].searchBooks;
+    document.getElementById('search-comics-title').innerText = translations[currentLanguage].searchBooks;
     document.getElementById('search-authors-title').innerText = translations[currentLanguage].searchAuthors;
     document.getElementById('profile-stories-title').innerText = translations[currentLanguage].profileStories;
     document.getElementById('story-type-title').innerText = translations[currentLanguage].createStory;
@@ -13558,7 +13693,7 @@ document.getElementById('category-filter').addEventListener('change', performRea
   }
 
   function renderBooksCarousel(books) {
-    const carousel = document.getElementById('search-books-carousel');
+    const carousel = document.getElementById('search-comics-carousel');
     carousel.innerHTML = '';
     books.forEach(book => {
       const card = document.createElement('div');
@@ -17744,7 +17879,7 @@ function closeBeabooStudio() {
       terror: "Historias de Terror Destacadas",
       searchPlaceholder: "Buscar historias o autores",
       searchResults: "Resultados de búsqueda",
-      searchBooks: "Libros",
+      searchBooks: "Cómic",
       searchAuthors: "Autores",
       profileStories: "Mis Historias",
       editProfile: "Editar nombre",
