@@ -9,8 +9,10 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4653147807800151" crossorigin="anonymous"></script>
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tailwind CSS estático (optimizado) -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.0/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <!-- Font Awesome CDN -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-pap6t+K2bD6xIxQqkQ3sM8e+RXw7C3DyrgXV++o2aL/88+/9kS/l+SmpD8zZR1oN40Nq3QfT7HigDYfFW1zZAQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <!-- Firebase (compat) -->
@@ -289,7 +291,7 @@
 
 /* Report modal ya no necesita CSS legacy - usa Tailwind classes */
 
-    /* MODAL DE ERROR PARA USUARIO BLOQUEADO */
+    /* MODAL DE ERROR PARA USUARIO BLOQUEADO (CORREGIDO - YA NO BLOQUEA) */
 #blocked-error-modal {
   position: fixed;
   inset: 0;
@@ -297,6 +299,7 @@
   background-color: white;
   align-items: center;
   justify-content: center;
+  z-index: 9999;
 }
 
 #blocked-error-modal img {
@@ -305,8 +308,23 @@
   object-fit: cover;
 }
 
+/* CRÍTICO: Botón de cerrar SIEMPRE visible (corrige bloqueos) */
 #blocked-error-modal button {
-  display: none;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
+  background: rgba(0,0,0,0.7);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
 }
 
 /* MODAL DE CREACIÓN DE CAPÍTULO FULL SCREEN MODERNIZADO */
@@ -1519,6 +1537,67 @@
     }
   </style>
   <script>
+    /*********************** SISTEMA DE GESTIÓN DE FIREBASE (PREVIENE DUPLICADOS) ***********************/
+    let firebaseListeners = {
+      authListener: null,
+      databaseListeners: new Map(),
+      initialized: false
+    };
+
+    // Sistema unificado de autenticación (elimina duplicados)
+    function initializeFirebaseAuth() {
+      if (firebaseListeners.authListener) {
+        // Desconectar listener anterior si existe
+        firebaseListeners.authListener();
+        firebaseListeners.authListener = null;
+      }
+      
+      // Crear un solo listener de autenticación
+      firebaseListeners.authListener = firebase.auth().onAuthStateChanged(user => {
+        handleAuthStateChange(user);
+      });
+    }
+
+    // Función unificada para manejar cambios de autenticación
+    function handleAuthStateChange(user) {
+      if (user) {
+        // Usuario autenticado
+        if (!firebaseListeners.initialized) {
+          firebaseListeners.initialized = true;
+          setupUserListeners(user);
+          initializeStore();
+          loadFollowingStories();
+          listenForUnreadMessages();
+        }
+      } else {
+        // Usuario no autenticado
+        cleanupAllListeners();
+        firebaseListeners.initialized = false;
+      }
+    }
+
+    // Limpiar todos los listeners al desconectar
+    function cleanupAllListeners() {
+      firebaseListeners.databaseListeners.forEach((unsubscribe, key) => {
+        unsubscribe();
+      });
+      firebaseListeners.databaseListeners.clear();
+    }
+
+    // Agregar listener de database con gestión automática
+    function addDatabaseListener(key, ref, callback) {
+      // Limpiar listener anterior si existe
+      if (firebaseListeners.databaseListeners.has(key)) {
+        firebaseListeners.databaseListeners.get(key)();
+      }
+      
+      // Agregar nuevo listener
+      const unsubscribe = ref.on('value', callback);
+      firebaseListeners.databaseListeners.set(key, () => ref.off('value', unsubscribe));
+      
+      return unsubscribe;
+    }
+
     /*********************** BLOQUEO DE ACCESO EN COMPUTADORAS (Móvil obligatorio) ***********************/
     function esDispositivoMovil() {
       return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -1581,13 +1660,22 @@
         }
       });
     }
-    window.addEventListener('load', setThemeBasedOnTime);
-    window.addEventListener('load', function() {
+    // Sistema de inicialización unificado (corrige múltiples listeners)
+    let appInitialized = false;
+    function initializeApp() {
+      if (appInitialized) return;
+      appInitialized = true;
+      
+      setThemeBasedOnTime();
+      
       if (window.innerWidth >= 1024) {
         document.body.classList.add('desktop');
       }
       
-      // Inicializar detectores automáticos después de que se carga la página
+      organizeCarousels();
+      initializeLanguage();
+      
+      // Inicializar detectores con delay
       setTimeout(() => {
         const user = firebase.auth().currentUser;
         if (user) {
@@ -1595,7 +1683,7 @@
           forceProfileUpdate();
         }
       }, 2000);
-    });
+    }
 
     function organizeCarousels() {
       const carouselIds = ['new-releases', 'top10', 'popular', 'terror-stories'];
@@ -1607,8 +1695,75 @@
         }
       });
     }
-    window.addEventListener('load', organizeCarousels);
-    document.addEventListener("DOMContentLoaded", function() {
+    
+    // Sistema universal de escape de modales (PREVIENE BLOQUEOS)
+    function setupUniversalModalEscape() {
+      // ESC key para cerrar cualquier modal
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          // Buscar modales visibles y cerrarlos
+          const visibleModals = document.querySelectorAll('[id*="modal"]:not(.hidden), [id*="modal"][style*="flex"], [id*="modal"][style*="block"]');
+          visibleModals.forEach(modal => {
+            if (modal.style.display !== 'none' && !modal.classList.contains('hidden')) {
+              // Intentar cerrar modal con función específica
+              if (modal.id.includes('blocked-error')) {
+                closeBlockedErrorModal();
+              } else if (modal.id.includes('live')) {
+                closeLiveStreamModal();
+              } else {
+                // Cerrar modal genérico
+                modal.style.display = 'none';
+                modal.classList.add('hidden');
+              }
+            }
+          });
+          
+          // Restaurar scroll del body si está bloqueado
+          document.body.style.overflow = 'auto';
+        }
+      }, { passive: true });
+      
+      // Click fuera del modal para cerrarlo
+      document.addEventListener('click', function(e) {
+        const modals = document.querySelectorAll('[id*="modal"]');
+        modals.forEach(modal => {
+          if (modal.style.display !== 'none' && !modal.classList.contains('hidden')) {
+            if (e.target === modal) {
+              modal.style.display = 'none';
+              modal.classList.add('hidden');
+              document.body.style.overflow = 'auto';
+            }
+          }
+        });
+      }, { passive: true });
+    }
+
+    // Función para cerrar modal de error bloqueado
+    function closeBlockedErrorModal() {
+      const modal = document.getElementById('blocked-error-modal');
+      if (modal) {
+        modal.style.display = 'none';
+        modal.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+      }
+    }
+
+    // Una sola llamada de inicialización
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() {
+        initializeApp();
+        setupUniversalModalEscape();
+      }, { once: true });
+    } else {
+      initializeApp();
+      setupUniversalModalEscape();
+    }
+    // Inicialización única de idioma
+    let languageInitialized = false;
+    function initializeLanguage() {
+      if (languageInitialized) return;
+      languageInitialized = true;
+      
       const savedLang = localStorage.getItem("selectedLanguage");
       if (savedLang) {
         currentLanguage = savedLang;
@@ -1619,7 +1774,7 @@
           languageModal.style.display = "flex";
         }
       }
-    });
+    }
 
     // Legacy function removed - chapters not used in comic system
     function updateChapterUI() {
@@ -6311,14 +6466,10 @@ function closeStore() {
   document.getElementById('main-app').classList.remove('hidden');
 }
 
-// Inicializar cuando se carga la página
+// Inicializar Firebase Auth de forma centralizada
 document.addEventListener('DOMContentLoaded', function() {
-  firebase.auth().onAuthStateChanged(user => {
-    if (user) {
-      initializeStore();
-    }
-  });
-});
+  initializeFirebaseAuth();
+}, { once: true });
 </script>
 
           </div>
@@ -11640,21 +11791,48 @@ function saveNote() {
   // Todos los usuarios están autorizados para transmitir en vivo
   const authorizedEmails = [];
   /*********************** FUNCIONES ADICIONALES **************************/
+  // Cache para optimizar filtro de profanidad (CORRIGE BLOQUEOS)
+  let profanityRegexCache = null;
+  let lastCheckedText = '';
+  let lastProfanityResult = false;
+  
   function contienePalabrasOfensivas(texto) {
-    // Lista de 20 palabras ofensivas en español (ejemplo; ajústala según tus necesidades)
-    const listaOfensiva = [
-      "imbécil", "idiota", "estúpido", "tarado", "pendejo",
-      "capullo", "gilipollas", "subnormal", "malparido", "bobo",
-      "tonto", "inútil", "cretino", "estúpida", "pendeja",
-      "zorra", "perra", "mierda", "cabrón", "merda"
-    ];
-    // Normalizamos el texto: quitamos acentos y lo convertimos a minúsculas
+    // Cache simple para evitar re-procesar el mismo texto
+    if (texto === lastCheckedText) {
+      return lastProfanityResult;
+    }
+    
+    // Crear regex una sola vez (OPTIMIZACIÓN CRÍTICA)
+    if (!profanityRegexCache) {
+      const listaOfensiva = [
+        "imbécil", "idiota", "estúpido", "tarado", "pendejo",
+        "capullo", "gilipollas", "subnormal", "malparido", "bobo",
+        "tonto", "inútil", "cretino", "estúpida", "pendeja",
+        "zorra", "perra", "mierda", "cabrón", "merda"
+      ];
+      
+      // Compilar regex una sola vez para mejor rendimiento
+      const pattern = listaOfensiva.map(word => `\\b${word}\\b`).join('|');
+      profanityRegexCache = new RegExp(pattern, 'i');
+    }
+    
+    // Normalización optimizada
     const textoNormalizado = texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-    // Se busca cada término usando delimitadores para coincidir palabras completas
-    return listaOfensiva.some(palabra => {
-      const regex = new RegExp("\\b" + palabra + "\\b", "i");
-      return regex.test(textoNormalizado);
-    });
+    
+    // Cache del resultado
+    lastCheckedText = texto;
+    lastProfanityResult = profanityRegexCache.test(textoNormalizado);
+    
+    return lastProfanityResult;
+  }
+  
+  // Función con debounce para inputs (evita bloqueos en tiempo real)
+  let profanityDebounceTimer = null;
+  function checkProfanityWithDebounce(texto, callback, delay = 300) {
+    clearTimeout(profanityDebounceTimer);
+    profanityDebounceTimer = setTimeout(() => {
+      callback(contienePalabrasOfensivas(texto));
+    }, delay);
   }
   /*********************** VARIABLES Y ELEMENTOS DEL DOM **************************/
   const authForm = document.getElementById('authForm');
