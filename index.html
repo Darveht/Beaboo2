@@ -1598,6 +1598,39 @@
       return unsubscribe;
     }
 
+    // Sistema de gestión de intervals (PREVIENE MEMORY LEAKS)
+    let activeIntervals = new Map();
+    
+    function setIntervalManaged(callback, delay, id = null) {
+      const intervalId = id || Date.now() + Math.random();
+      
+      // Limpiar interval anterior si existe
+      if (activeIntervals.has(intervalId)) {
+        clearInterval(activeIntervals.get(intervalId));
+      }
+      
+      // Crear nuevo interval
+      const interval = setInterval(callback, delay);
+      activeIntervals.set(intervalId, interval);
+      
+      return intervalId;
+    }
+    
+    function clearIntervalManaged(intervalId) {
+      if (activeIntervals.has(intervalId)) {
+        clearInterval(activeIntervals.get(intervalId));
+        activeIntervals.delete(intervalId);
+        return true;
+      }
+      return false;
+    }
+    
+    // Limpiar todos los intervals al cambiar página/usuario
+    function clearAllIntervals() {
+      activeIntervals.forEach(interval => clearInterval(interval));
+      activeIntervals.clear();
+    }
+
     /*********************** BLOQUEO DE ACCESO EN COMPUTADORAS (Móvil obligatorio) ***********************/
     function esDispositivoMovil() {
       return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -11271,20 +11304,24 @@ function likeNote(noteId) {
     });
 }
 
-  // VARIABLES GLOBALES
+  // VARIABLES GLOBALES (OPTIMIZADAS)
   let tapCount = 0,
     lastTap = 0,
     heartCount = 0;
   let touchstartX = 0,
-    touchendX = 0; // Para detección de swipe
+    touchendX = 0;
+  // Sistema de gestión de efectos DOM (PREVIENE SATURACIÓN)
+  let activeHearts = [];
+  const MAX_HEARTS = 20; // Límite máximo de corazones en pantalla
+  
   // -------------------------------
-  // Funciones para Corazones (Taps)
+  // Funciones para Corazones (Taps) - OPTIMIZADAS
   // -------------------------------
   function handleDoubleTap(event) {
     const currentTime = new Date().getTime();
     const tapLength = currentTime - lastTap;
     if (tapLength < 300 && tapLength > 0) {
-      createHeart(event.clientX, event.clientY);
+      createHeartOptimized(event.clientX, event.clientY);
       incrementHeartCount();
       lastTap = 0;
     } else {
@@ -11292,16 +11329,46 @@ function likeNote(noteId) {
     }
   }
 
-  function createHeart(x, y) {
+  function createHeartOptimized(x, y) {
+    // Limpiar corazones viejos si hay demasiados (PREVIENE SATURACIÓN)
+    if (activeHearts.length >= MAX_HEARTS) {
+      const oldestHeart = activeHearts.shift();
+      if (oldestHeart && oldestHeart.parentNode) {
+        oldestHeart.remove();
+      }
+    }
+    
     const heart = document.createElement('div');
     heart.classList.add('heart');
-    heart.style.left = (x - 12) + 'px';
-    heart.style.top = (y - 12) + 'px';
+    heart.style.cssText = `
+      position: fixed;
+      left: ${x - 12}px;
+      top: ${y - 12}px;
+      pointer-events: none;
+      z-index: 1000;
+      animation: heartFloat 2s ease-out forwards;
+    `;
     heart.innerHTML = '❤️';
-    document.getElementById('hearts-container').appendChild(heart);
-    setTimeout(() => {
-      heart.remove();
-    }, 2000);
+    
+    const container = document.getElementById('hearts-container');
+    if (container) {
+      container.appendChild(heart);
+      activeHearts.push(heart);
+      
+      // Remover después de animación
+      setTimeout(() => {
+        if (heart.parentNode) {
+          heart.remove();
+          const index = activeHearts.indexOf(heart);
+          if (index > -1) activeHearts.splice(index, 1);
+        }
+      }, 2000);
+    }
+  }
+  
+  // Mantener compatibilidad con código existente
+  function createHeart(x, y) {
+    createHeartOptimized(x, y);
   }
 
   function incrementHeartCount() {
