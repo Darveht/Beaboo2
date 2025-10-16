@@ -7979,9 +7979,7 @@ button {
 
     // Verificar si el usuario tiene el regalo en su inventario
     if (!userGiftInventory[giftName] || userGiftInventory[giftName] <= 0) {
-      alert('No tienes este regalo en tu inventario. Ve a la tienda para comprarlo.');
-      openStore();
-      switchStoreCategory('gifts');
+      alert('No tienes este regalo en tu inventario.');
       return;
     }
 
@@ -9212,22 +9210,14 @@ function likeNote(noteId) {
     const user = firebase.auth().currentUser;
     if (!user) return;
     
-    // Cargar saldo de monedas en tiempo real
-    updateStoreCoinsBalance(user.uid);
-    
     // Verificar si tiene regalos en inventario
     firebase.database().ref('users/' + user.uid + '/giftInventory').once('value').then(snapshot => {
       const inventory = snapshot.val() || {};
       const hasGifts = Object.values(inventory).some(amount => amount > 0);
       
       if (!hasGifts) {
-        // Si no tiene regalos, mostrar mensaje y redirigir a tienda
-        if (confirm('No tienes regalos en tu inventario. ¿Quieres ir a la tienda para comprar regalos?')) {
-          closeGiftDrawer();
-          openStore();
-          switchStoreCategory('gifts');
-          return;
-        }
+        alert('No tienes regalos en tu inventario.');
+        return;
       }
       
       // Actualizar gift drawer con inventario disponible
