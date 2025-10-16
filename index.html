@@ -3087,7 +3087,7 @@ function formatTimestamp(timestamp) {
       <img src="https://i.ibb.co/RTS0yszd/IMG-3883.png" alt="BeaBoo" class="h-16 w-auto" id="auth-logo">
     </div>
     <!-- Formulario ocupa todo el ancho disponible -->
-    <form id="authForm" class="w-full space-y-6 max-w-lg mx-auto">
+    <form id="authForm" class="w-full space-y-6 max-w-lg mx-auto" onsubmit="handleAuthSubmit(event)">
       <input
         id="emailInput"
         type="email"
@@ -3110,6 +3110,60 @@ function formatTimestamp(timestamp) {
         Iniciar Sesión
       </button>
     </form>
+    
+    <script>
+    // Función para manejar el envío del formulario de autenticación
+    function handleAuthSubmit(event) {
+      event.preventDefault();
+      
+      const email = document.getElementById('emailInput').value;
+      const password = document.getElementById('passwordInput').value;
+      const submitButton = document.getElementById('submitButton');
+      const authError = document.getElementById('authError');
+      
+      // Mostrar loading
+      submitButton.disabled = true;
+      submitButton.innerHTML = '<div class="tiktok-loader"><div class="tiktok-dot"></div><div class="tiktok-dot"></div></div>';
+      
+      // Intentar iniciar sesión
+      firebase.auth().signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+          console.log('✅ Inicio de sesión exitoso');
+          // El listener de auth se encargará de mostrar la app
+        })
+        .catch((error) => {
+          console.error('❌ Error de autenticación:', error);
+          
+          // Si el usuario no existe, crearlo automáticamente
+          if (error.code === 'auth/user-not-found') {
+            firebase.auth().createUserWithEmailAndPassword(email, password)
+              .then(() => {
+                console.log('✅ Usuario creado exitosamente');
+              })
+              .catch((createError) => {
+                showAuthError('Error al crear usuario: ' + createError.message);
+                resetSubmitButton();
+              });
+          } else {
+            showAuthError('Error: ' + error.message);
+            resetSubmitButton();
+          }
+        });
+    }
+    
+    function showAuthError(message) {
+      const authError = document.getElementById('authError');
+      authError.textContent = message;
+      authError.classList.remove('hidden');
+      setTimeout(() => authError.classList.add('hidden'), 5000);
+    }
+    
+    function resetSubmitButton() {
+      const submitButton = document.getElementById('submitButton');
+      submitButton.disabled = false;
+      submitButton.textContent = 'Iniciar Sesión';
+    }
+    </script>
     <!-- Links y toggle debajo del formulario -->
     <div class="mt-6 text-center space-y-4 max-w-lg mx-auto">
       <a
@@ -3747,52 +3801,15 @@ function showSuccessNotification(message) {
   }, 4000);
 }
 
-// Verificar estado del PIN al cargar la aplicación
+// Sistema de PIN desactivado temporalmente para evitar conflictos
 function checkPinStatus() {
-  const user = firebase.auth().currentUser;
-  if (!user) return;
-  
-  // Verificar si ya se verificó en esta sesión
-  if (sessionStorage.getItem('pinVerified') === 'true') {
-    return;
-  }
-  
-  // Verificar si el tiempo ya expiró
-  if (sessionStorage.getItem('pinExpired') === 'true') {
-    return;
-  }
-  
-  // Si tiene PIN asignado, enviarlo y luego mostrar modal
-  if (securityPinData.pins[user.email]) {
-    // Enviar PIN primero
-    sendSecurityPinToUser(user.email);
-    
-    // Mostrar modal después de un breve delay
-    setTimeout(() => {
-      showSecurityPinModal();
-    }, 2000);
-  }
+  // PIN system disabled
+  return;
 }
 
-// Inicializar sistema automático al cargar la página
-document.addEventListener('DOMContentLoaded', function() {
-  // Esperar a que Firebase esté listo
-  firebase.auth().onAuthStateChanged(user => {
-    if (user) {
-      // Iniciar sistema automático después de 3 segundos
-      setTimeout(() => {
-        console.log('🔐 Iniciando sistema de PINs automático...');
-        startAutomaticPinSending();
-      }, 3000);
-    }
-  });
-});
-
-// Limpiar estado del PIN al cerrar sesión
 function clearPinStatus() {
-  sessionStorage.removeItem('pinVerified');
-  sessionStorage.removeItem('pinExpired');
-  clearPinTimer();
+  // PIN system disabled
+  return;
 }
 </script>
 
@@ -5786,34 +5803,65 @@ function handleProfileImageUploadDesktop(event) {
     }
   }
 
-  // ===== BEABOO 2.0 - LISTENER DE AUTENTICACIÓN SEGURO =====
+  // ===== BEABOO 2.0 - LISTENER DE AUTENTICACIÓN CORREGIDO =====
+let authListenerActive = false;
+
+function initializeAuthListener() {
+  if (authListenerActive) {
+    console.log('Auth listener ya activo - evitando duplicados');
+    return;
+  }
+  
+  authListenerActive = true;
+  
   firebase.auth().onAuthStateChanged(user => {
+    const authFormContainer = document.getElementById('auth-form');
+    const mainApp = document.getElementById('main-app');
+    
     if (user) {
       console.log('✅ Usuario autenticado:', user.email);
       
-      // Inicializar detectores automáticos y cargar perfil de forma segura
+      // Mostrar app principal inmediatamente
+      if (authFormContainer && mainApp) {
+        authFormContainer.classList.add('hidden');
+        mainApp.classList.remove('hidden');
+      }
+      
+      // Cargar datos del usuario sin delay excesivo
       setTimeout(() => {
         setupAutoDetectors();
         updateBottomNavProfilePic();
-        loadUserProfile(); // Ya usa nuestro sistema seguro
-        
-        // Cargar datos iniciales del usuario de forma segura
+        loadUserProfile();
         loadInitialUserData(user);
-      }, 1000);
+        
+        // Cargar contenido de la app
+        loadNewReleases();
+        loadTop10();
+        loadPopularStories();
+        loadTerrorStories();
+        loadSuggestedStories();
+        loadFeaturedAuthors();
+        loadFollowingStories();
+      }, 300);
     } else {
-      console.log('❌ Usuario no autenticado - limpiando estado');
-      // CRÍTICO: Limpiar estado cuando no hay usuario autenticado
+      console.log('❌ Usuario no autenticado');
       clearUserState();
       
-      // También ocultar app principal y mostrar formulario de auth
-      const authFormContainer = document.getElementById('auth-form');
-      const mainApp = document.getElementById('main-app');
+      // Mostrar formulario de autenticación
       if (authFormContainer && mainApp) {
         authFormContainer.classList.remove('hidden');
         mainApp.classList.add('hidden');
       }
     }
   });
+}
+
+// Inicializar listener una sola vez
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeAuthListener, { once: true });
+} else {
+  initializeAuthListener();
+}
 
   // Función para cargar datos iniciales del usuario
   function loadInitialUserData(user) {
@@ -6263,10 +6311,7 @@ function handleProfileImageUploadDesktop(event) {
             </button>
 
 
-// Inicializar Firebase Auth de forma centralizada
-document.addEventListener('DOMContentLoaded', function() {
-  initializeFirebaseAuth();
-}, { once: true });
+// La inicialización de Firebase Auth se maneja en initializeAuthListener()
 </script>
 
           </div>
