@@ -4,6 +4,20 @@
 
 BeaBoo is a Spanish-language web application that appears to be a TikTok-inspired social platform. The application features a modern, mobile-first design with a pink pastel color scheme that mimics TikTok's aesthetic. It's built as a single-page application with Firebase integration for backend services including authentication, storage, and real-time database functionality.
 
+## Recent Changes (October 2025)
+
+### New&HoT Video Section
+- **TikTok-Style Video Player**: New vertical video section accessible from bottom navigation
+- **Video Content**: Features promotional trailers and content from administrators
+- **Interactive Controls**: 
+  - Save button with animation to bookmark videos
+  - Report functionality with bottom-sliding modal for content moderation
+  - Direct links to featured content (e.g., "Start Reading" for comics)
+- **First Video**: "Crimson Moon Embrace" comic trailer hosted on Dropbox
+
+### Removed Features
+- **Messaging System**: Completely removed real-time chat and messaging functionality to streamline the user experience
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
