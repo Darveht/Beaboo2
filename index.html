@@ -2662,8 +2662,15 @@ function openNewHot() {
     newHotView.classList.remove('hidden');
     mainApp.classList.add('hidden');
     
-    // Solo cargar el video, sin reproducir automáticamente
+    // Cargar y reproducir el video automáticamente
     video.load();
+    
+    // Intentar reproducir después de cargar
+    setTimeout(() => {
+      video.play().catch(error => {
+        console.log('Error al reproducir:', error);
+      });
+    }, 300);
   }
 }
 
