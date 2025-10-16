@@ -5931,292 +5931,116 @@ function saveNote() {
   </div>
 </div>
 
-<!-- VISTA DE CREACIÓN DE CÓMICS - PANTALLA COMPLETA -->
-<div id="comic-creation-view" class="fixed inset-0 overflow-y-auto z-50 hidden bg-gradient-to-b from-white to-[#f9f9f9] text-black">
-  <div class="min-h-screen w-full">
-    <!-- Header fijo -->
-    <div class="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-gray-200 p-4">
+<!-- VISTA DE CREACIÓN DE HISTORIA -->
+<div id="story-creation-view" class="fixed inset-0 overflow-y-auto z-50 hidden bg-gradient-to-b from-white to-pink-50 text-black">
+  <div class="min-h-screen w-full pb-20">
+    <!-- Header -->
+    <div class="sticky top-0 z-10 bg-white/90 backdrop-blur-md border-b border-pink-200 p-4">
       <div class="flex items-center justify-between max-w-4xl mx-auto">
-        <button onclick="closeComicCreation()" class="text-[#FE2C55] font-medium flex items-center hover:bg-gray-100 px-3 py-2 rounded-lg transition-colors">
+        <button onclick="closeStoryCreation()" class="text-[#FE2C55] font-medium flex items-center hover:bg-pink-50 px-3 py-2 rounded-lg transition-colors">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
           <span>Volver</span>
         </button>
-        <h1 class="text-xl font-bold text-[#FE2C55]">BeaBoo Comics Studio</h1>
-        <div class="w-20"></div> <!-- Spacer para centrar el título -->
+        <h1 class="text-xl font-bold text-[#FE2C55]">✨ Crear Historia</h1>
+        <div class="w-20"></div>
       </div>
     </div>
 
-    <!-- Contenido principal -->
-    <div class="max-w-4xl mx-auto px-4 py-8">
-      <div class="text-center mb-12">
-        <h2 class="text-4xl md:text-5xl font-bold mb-4 text-black">Crea tu Comic</h2>
-        <p class="text-lg text-gray-600 max-w-2xl mx-auto">Sube tus páginas de cómic y crea una experiencia de lectura vertical única estilo WEBTOON para tus lectores.</p>
+    <!-- Contenido -->
+    <div class="max-w-3xl mx-auto px-4 py-8">
+      <div class="text-center mb-10">
+        <h2 class="text-3xl font-bold mb-3 text-black">Comparte tu historia con el mundo</h2>
+        <p class="text-gray-600">Crea una nueva historia y conecta con miles de lectores</p>
       </div>
 
-      <!-- Formulario de creación de cómic -->
-      <form id="comic-creation-form" class="max-w-2xl mx-auto">
-        <!-- Título del cómic -->
-        <div class="mb-8">
-          <label class="block text-lg font-semibold mb-3 text-gray-800">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-            </svg>
-            Título del Cómic
+      <!-- Formulario -->
+      <form id="story-creation-form" class="space-y-6">
+        <!-- Título -->
+        <div class="bg-white rounded-2xl p-6 border border-pink-200 shadow-sm">
+          <label class="block text-sm font-semibold mb-2 text-gray-700">
+            📖 Título de la historia
           </label>
-          <input type="text" id="comic-title" placeholder="Ej: Mi Aventura Fantástica" class="w-full p-4 border-2 border-gray-300 rounded-xl focus:border-[#FE2C55] focus:ring-2 focus:ring-[#FE2C55]/20 text-lg transition-all" required>
+          <input type="text" id="story-title-input" placeholder="Ej: El Reino Olvidado" 
+                 class="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-[#FE2C55] focus:ring-2 focus:ring-pink-200 outline-none transition-all" required>
         </div>
 
         <!-- Descripción -->
-        <div class="mb-8">
-          <label class="block text-lg font-semibold mb-3 text-gray-800">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            Descripción
+        <div class="bg-white rounded-2xl p-6 border border-pink-200 shadow-sm">
+          <label class="block text-sm font-semibold mb-2 text-gray-700">
+            ✍️ Descripción
           </label>
-          <textarea id="comic-description" placeholder="Describe brevemente tu cómic..." class="w-full p-4 border-2 border-gray-300 rounded-xl focus:border-[#FE2C55] focus:ring-2 focus:ring-[#FE2C55]/20 text-lg resize-none" rows="3" required></textarea>
+          <textarea id="story-description-input" placeholder="¿De qué trata tu historia?" 
+                    class="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-[#FE2C55] focus:ring-2 focus:ring-pink-200 outline-none resize-none transition-all" 
+                    rows="4" required></textarea>
         </div>
 
         <!-- Categoría -->
-        <div class="mb-8">
-          <label class="block text-lg font-semibold mb-3 text-gray-800">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.99 1.99 0 013 12V7a4 4 0 014-4z" />
-            </svg>
-            Categoría
+        <div class="bg-white rounded-2xl p-6 border border-pink-200 shadow-sm">
+          <label class="block text-sm font-semibold mb-2 text-gray-700">
+            🏷️ Categoría
           </label>
-          <select id="comic-category" class="w-full p-4 border-2 border-gray-300 rounded-xl focus:border-[#FE2C55] focus:ring-2 focus:ring-[#FE2C55]/20 text-lg" required>
+          <select id="story-category-input" 
+                  class="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-[#FE2C55] focus:ring-2 focus:ring-pink-200 outline-none transition-all" required>
             <option value="">Selecciona una categoría</option>
-            <option value="accion">🔥 Acción</option>
-            <option value="aventura">🗺️ Aventura</option>
             <option value="romance">💕 Romance</option>
             <option value="fantasia">🧙‍♂️ Fantasía</option>
-            <option value="drama">🎭 Drama</option>
-            <option value="comedia">😄 Comedia</option>
+            <option value="aventura">🗺️ Aventura</option>
+            <option value="misterio">🔍 Misterio</option>
             <option value="terror">👻 Terror</option>
-            <option value="slice_of_life">🌟 Slice of Life</option>
+            <option value="ciencia_ficcion">🚀 Ciencia Ficción</option>
+            <option value="drama">🎭 Drama</option>
+            <option value="humor">😄 Humor</option>
           </select>
         </div>
 
-        <!-- Zona de subida de páginas -->
-        <div class="mb-8">
-          <label class="block text-lg font-semibold mb-3 text-gray-800">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            Páginas del Cómic
+        <!-- Portada -->
+        <div class="bg-white rounded-2xl p-6 border border-pink-200 shadow-sm">
+          <label class="block text-sm font-semibold mb-2 text-gray-700">
+            🖼️ Imagen de portada
           </label>
-          <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-[#FE2C55] transition-colors">
-            <input type="file" id="comic-pages" multiple accept="image/*" class="hidden" onchange="handleComicPagesUpload(event)">
-            <button type="button" onclick="document.getElementById('comic-pages').click()" class="inline-flex items-center px-6 py-3 bg-[#FE2C55] text-white rounded-lg hover:bg-red-600 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-              </svg>
-              Subir Páginas
-            </button>
-            <p class="text-gray-500 mt-2">Arrastra y suelta archivos aquí o haz clic para seleccionar</p>
-            <p class="text-sm text-gray-400 mt-1">Formatos: PNG, JPG, JPEG. Máximo 20 páginas.</p>
-          </div>
-          
-          <!-- Preview de páginas subidas -->
-          <div id="pages-preview" class="mt-6 grid grid-cols-3 gap-4 hidden">
-            <!-- Las páginas se mostrarán aquí dinámicamente -->
-          </div>
-        </div>
-
-        <!-- Imagen de portada -->
-        <div class="mb-8">
-          <label class="block text-lg font-semibold mb-3 text-gray-800">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            Imagen de Portada
-          </label>
-          <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-[#FE2C55] transition-colors">
-            <input type="file" id="comic-cover" accept="image/*" class="hidden" onchange="handleCoverUpload(event)">
-            <button type="button" onclick="document.getElementById('comic-cover').click()" class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-[#FE2C55] transition-colors cursor-pointer" onclick="document.getElementById('story-cover-input').click()">
+            <input type="file" id="story-cover-input" accept="image/*" class="hidden" onchange="previewStoryCover(event)">
+            <div id="cover-upload-area">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              Seleccionar Portada
-            </button>
-            <div id="cover-preview" class="mt-4 hidden">
-              <!-- Preview de la portada -->
+              <p class="text-gray-600">Haz clic para subir una portada</p>
+              <p class="text-sm text-gray-400 mt-1">PNG, JPG (Recomendado: 600x800px)</p>
+            </div>
+            <div id="cover-preview-area" class="hidden">
+              <img id="cover-preview-img" src="" alt="Portada" class="max-h-64 mx-auto rounded-lg">
+              <button type="button" onclick="removeCoverPreview(event)" class="mt-3 text-red-500 text-sm hover:text-red-600">
+                ✕ Eliminar portada
+              </button>
             </div>
           </div>
         </div>
 
-        <!-- Botón de crear cómic -->
-        <div class="text-center">
-          <button type="submit" class="inline-flex items-center px-12 py-4 text-lg font-semibold text-white bg-gradient-to-r from-[#FE2C55] to-[#f97f97] rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-            Publicar Cómic
-          </button>
-        </div>
+        <!-- Botón crear -->
+        <button type="submit" class="w-full bg-gradient-to-r from-[#FE2C55] to-pink-400 text-white py-4 rounded-xl font-bold text-lg hover:from-red-600 hover:to-pink-500 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02]">
+          🚀 Crear Historia
+        </button>
       </form>
 
-      <!-- Consejos para cómics -->
-      <div class="mt-16 bg-gradient-to-r from-[#FE2C55] to-[#ff6b7a] rounded-2xl p-8 text-white">
-        <div class="text-center">
-          <h3 class="text-2xl font-bold mb-4">Consejos para tu Comic</h3>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-            <div class="text-center">
-              <div class="w-12 h-12 mx-auto mb-3 bg-white/20 rounded-full flex items-center justify-center">
-                <span class="text-xl">📏</span>
-              </div>
-              <h4 class="font-semibold mb-2">Formato Vertical</h4>
-              <p class="text-sm opacity-90">Diseña tus páginas pensando en lectura vertical continua</p>
-            </div>
-            <div class="text-center">
-              <div class="w-12 h-12 mx-auto mb-3 bg-white/20 rounded-full flex items-center justify-center">
-                <span class="text-xl">🎨</span>
-              </div>
-              <h4 class="font-semibold mb-2">Alta Calidad</h4>
-              <p class="text-sm opacity-90">Usa imágenes de alta resolución para mejor experiencia</p>
-            </div>
-            <div class="text-center">
-              <div class="w-12 h-12 mx-auto mb-3 bg-white/20 rounded-full flex items-center justify-center">
-                <span class="text-xl">🔄</span>
-              </div>
-              <h4 class="font-semibold mb-2">Conecta con lectores</h4>
-              <p class="text-sm opacity-90">Comparte tu trabajo y recibe feedback de la comunidad</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- LECTOR DE WEBTOON - SCROLL VERTICAL -->
-<div id="webtoon-reader" class="fixed inset-0 z-50 hidden bg-black">
-  <div class="relative w-full h-full flex flex-col">
-    <!-- Header del lector -->
-    <div class="absolute top-0 left-0 right-0 z-20 bg-gradient-to-b from-black/80 to-transparent p-4">
-      <div class="flex items-center justify-between text-white">
-        <button onclick="closeWebtoonReader()" class="flex items-center hover:bg-white/10 px-3 py-2 rounded-lg transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          <span>Volver</span>
-        </button>
-        
-        <div class="text-center">
-          <h1 id="comic-title-header" class="text-lg font-bold">Título del Cómic</h1>
-          <p id="comic-episode-info" class="text-sm opacity-75">Episodio 1</p>
-        </div>
-        
-        <div class="flex items-center space-x-3">
-          <!-- Botón de configuración -->
-          <button onclick="toggleReaderSettings()" class="p-2 hover:bg-white/10 rounded-lg transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          </button>
-          
-          <!-- Botón de me gusta -->
-          <button onclick="toggleComicLike()" class="p-2 hover:bg-white/10 rounded-lg transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Contenedor principal con scroll -->
-    <div id="webtoon-scroll-container" class="flex-1 overflow-y-auto" style="scroll-behavior: smooth;">
-      <div id="webtoon-pages-container" class="min-h-full flex flex-col items-center bg-black">
-        <!-- Las páginas del cómic se cargarán aquí dinámicamente -->
-        <div class="w-full max-w-2xl mx-auto">
-          <!-- Página de ejemplo - será reemplazada por contenido dinámico -->
-          <div class="comic-page w-full mb-2">
-            <img src="https://via.placeholder.com/800x2000/333333/666666?text=Página+1" 
-                 alt="Página del cómic" 
-                 class="w-full h-auto block">
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Indicador de progreso de lectura -->
-    <div class="fixed right-4 top-1/2 transform -translate-y-1/2 z-30">
-      <div class="bg-white/20 backdrop-blur-sm rounded-full p-2 text-white text-xs">
-        <div id="reading-progress" class="w-16 text-center">0%</div>
-      </div>
-    </div>
-
-    <!-- Controles de navegación (aparecen al tocar) -->
-    <div id="navigation-controls" class="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 bg-black/50 backdrop-blur-sm rounded-full px-6 py-3 text-white opacity-0 transition-opacity duration-300">
-      <div class="flex items-center space-x-4">
-        <button onclick="previousEpisode()" class="p-2 hover:bg-white/10 rounded-lg transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        
-        <span id="episode-counter" class="text-sm">1 / 1</span>
-        
-        <button onclick="nextEpisode()" class="p-2 hover:bg-white/10 rounded-lg transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-      </div>
-    </div>
-
-    <!-- Panel de configuración del lector -->
-    <div id="reader-settings" class="absolute top-0 right-0 w-80 h-full bg-black/90 backdrop-blur-sm transform translate-x-full transition-transform duration-300 z-30">
-      <div class="p-6 text-white">
-        <div class="flex items-center justify-between mb-6">
-          <h3 class="text-lg font-bold">Configuración</h3>
-          <button onclick="toggleReaderSettings()" class="p-2 hover:bg-white/10 rounded-lg transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-        
-        <!-- Brillo -->
-        <div class="mb-6">
-          <label class="block text-sm font-medium mb-2">Brillo</label>
-          <input type="range" id="brightness-slider" min="50" max="150" value="100" 
-                 class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                 onchange="adjustBrightness(this.value)">
-        </div>
-        
-        <!-- Modo de lectura -->
-        <div class="mb-6">
-          <label class="block text-sm font-medium mb-2">Modo de lectura</label>
-          <div class="space-y-2">
-            <label class="flex items-center">
-              <input type="radio" name="reading-mode" value="fit-width" checked class="mr-2">
-              <span class="text-sm">Ajustar al ancho</span>
-            </label>
-            <label class="flex items-center">
-              <input type="radio" name="reading-mode" value="fit-height" class="mr-2">
-              <span class="text-sm">Ajustar a la altura</span>
-            </label>
-          </div>
-        </div>
-        
-        <!-- Auto-scroll -->
-        <div class="mb-6">
-          <label class="flex items-center justify-between">
-            <span class="text-sm font-medium">Auto-scroll</span>
-            <input type="checkbox" id="auto-scroll" class="toggle-checkbox">
-          </label>
-          <div id="auto-scroll-settings" class="mt-2 hidden">
-            <label class="block text-xs text-gray-300 mb-1">Velocidad</label>
-            <input type="range" id="scroll-speed" min="1" max="10" value="3" 
-                   class="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer">
-          </div>
-        </div>
+      <!-- Tips -->
+      <div class="mt-10 bg-gradient-to-r from-pink-50 to-rose-50 rounded-2xl p-6 border border-pink-200">
+        <h3 class="font-bold text-lg mb-4 text-[#FE2C55]">💡 Consejos para escritores</h3>
+        <ul class="space-y-2 text-sm text-gray-700">
+          <li class="flex items-start">
+            <span class="mr-2">✨</span>
+            <span>Elige un título atractivo que capture la esencia de tu historia</span>
+          </li>
+          <li class="flex items-start">
+            <span class="mr-2">📝</span>
+            <span>Escribe una descripción que enganche a los lectores desde el inicio</span>
+          </li>
+          <li class="flex items-start">
+            <span class="mr-2">🎨</span>
+            <span>Una buena portada aumenta las posibilidades de que lean tu historia</span>
+          </li>
+        </ul>
       </div>
     </div>
   </div>
@@ -6298,57 +6122,177 @@ function saveNote() {
   </div>
 </div>
 
-<!-- MODAL DE CREACIÓN/EDICIÓN DE CAPÍTULO -->
-<div id="chapter-creation-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
-  <div class="modal-content bg-gradient-to-b from-white to-[#f9f9f9] text-black p-4 rounded-xl shadow-lg w-11/12 max-w-3xl">
-    <div class="flex justify-between items-center mb-4">
-      <h2 id="chapter-creation-title" class="text-2xl font-bold text-[#FE2C55]">Agregar Nuevo Capítulo</h2>
-      <button onclick="closeChapterCreationModal()" class="text-gray-500 hover:text-black transition-colors">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-    </div>
-
-    <!-- Barra de herramientas -->
-    <div id="chapter-creation-toolbar" class="bg-white p-3 rounded-lg mb-4 flex flex-wrap gap-4 items-center">
-      <div class="flex items-center">
-        <label for="font-family" class="text-sm text-gray-600 mr-2">Fuente:</label>
-        <select id="font-family" class="bg-white border border-gray-300 rounded-lg text-black text-sm p-1.5 focus:ring-2 focus:ring-[#FE2C55]">
-          <option value="Arial">Arial</option>
-          <option value="Times New Roman">Times New Roman</option>
-          <option value="Courier New">Courier New</option>
-          <option value="Georgia">Georgia</option>
-        </select>
-      </div>
-
-      <div class="flex items-center flex-1 min-w-[200px]">
-        <label for="font-size" class="text-sm text-gray-600 mr-2">Tamaño:</label>
-        <input type="range" id="font-size" min="12" max="36" value="16" class="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer accent-[#FE2C55] mr-2">
-        <span id="font-size-value" class="text-sm">16px</span>
-      </div>
-
-      <div class="bg-white py-1 px-3 rounded-lg text-sm text-gray-600">
-        <span id="word-count">0 palabras</span> - <span id="letter-count">0 letras</span>
+<!-- MODAL DE CREACIÓN/EDICIÓN DE CAPÍTULO - Estilo Wattpad Moderno -->
+<div id="chapter-creation-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden">
+  <div class="w-full h-full flex flex-col bg-white">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-[#FE2C55] to-pink-400 p-4 text-white">
+      <div class="flex items-center justify-between max-w-5xl mx-auto">
+        <button onclick="closeChapterCreationModal()" class="flex items-center hover:bg-white/20 px-3 py-2 rounded-lg transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          <span>Cancelar</span>
+        </button>
+        <h2 id="chapter-creation-title" class="text-xl font-bold">Nuevo Capítulo</h2>
+        <button id="btn-save-chapter-header" type="button" onclick="saveChapterFromHeader()" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg font-medium transition-colors">
+          Publicar
+        </button>
       </div>
     </div>
 
-    <form id="chapter-form" class="space-y-4">
-      <div class="flex items-center gap-4 mb-4">
-        <input type="datetime-local" id="chapter-schedule" class="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FE2C55]">
-        <label class="text-sm text-gray-600">Fecha de publicación (opcional)</label>
-      </div>
-      <textarea id="chapter-content" placeholder="Escribe el contenido del capítulo aquí..." class="w-full p-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FE2C55] text-black placeholder-gray-500 resize-none" style="font-size:16px; font-family: Arial;" rows="12" required></textarea>
+    <!-- Contenido principal -->
+    <div class="flex-1 overflow-y-auto bg-pink-50">
+      <div class="max-w-5xl mx-auto p-6">
+        <form id="chapter-form" class="space-y-6">
+          
+          <!-- Título del capítulo -->
+          <div class="bg-white rounded-2xl p-6 border border-pink-200 shadow-sm">
+            <label class="block text-sm font-semibold mb-2 text-gray-700">
+              📝 Título del capítulo
+            </label>
+            <input type="text" id="chapter-title-input" placeholder="Ej: Capítulo 1 - El comienzo" 
+                   class="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-[#FE2C55] focus:ring-2 focus:ring-pink-200 outline-none text-lg transition-all" required>
+          </div>
 
-      <button id="btn-save-chapter" type="submit" class="w-full bg-[#FE2C55] text-white p-3 rounded-lg font-medium flex items-center justify-center hover:bg-red-600 transition-all">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-        </svg>
-        <span>Guardar Capítulo</span>
-      </button>
-    </form>
+          <!-- Programar publicación -->
+          <div class="bg-white rounded-2xl p-6 border border-pink-200 shadow-sm">
+            <label class="flex items-center justify-between cursor-pointer">
+              <div>
+                <span class="text-sm font-semibold text-gray-700">⏰ Programar publicación</span>
+                <p class="text-xs text-gray-500 mt-1">Publica automáticamente en una fecha específica</p>
+              </div>
+              <input type="checkbox" id="schedule-toggle" class="toggle-checkbox" onchange="toggleScheduleSection()">
+            </label>
+            <div id="schedule-section" class="hidden mt-4">
+              <input type="datetime-local" id="chapter-schedule" 
+                     class="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-[#FE2C55] focus:ring-2 focus:ring-pink-200 outline-none">
+            </div>
+          </div>
+
+          <!-- Editor de contenido -->
+          <div class="bg-white rounded-2xl p-6 border border-pink-200 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+              <label class="text-sm font-semibold text-gray-700">
+                ✍️ Contenido del capítulo
+              </label>
+              <div class="flex items-center gap-3 text-sm text-gray-500">
+                <span id="word-count">0 palabras</span>
+                <span>•</span>
+                <span id="char-count">0 caracteres</span>
+              </div>
+            </div>
+
+            <!-- Barra de herramientas de formato -->
+            <div class="flex flex-wrap gap-2 mb-4 p-3 bg-gray-50 rounded-xl">
+              <select id="font-family" onchange="applyFontFamily(this.value)" class="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#FE2C55] outline-none">
+                <option value="Georgia, serif">Georgia</option>
+                <option value="Arial, sans-serif">Arial</option>
+                <option value="'Times New Roman', serif">Times New Roman</option>
+                <option value="'Courier New', monospace">Courier New</option>
+              </select>
+
+              <div class="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-lg">
+                <button type="button" onclick="adjustFontSize(-1)" class="w-6 h-6 flex items-center justify-center hover:bg-gray-100 rounded transition-colors">
+                  <span class="text-sm font-bold">-</span>
+                </button>
+                <span id="font-size-display" class="text-sm min-w-[40px] text-center">16px</span>
+                <button type="button" onclick="adjustFontSize(1)" class="w-6 h-6 flex items-center justify-center hover:bg-gray-100 rounded transition-colors">
+                  <span class="text-sm font-bold">+</span>
+                </button>
+              </div>
+
+              <button type="button" onclick="toggleBold()" class="px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors">
+                <span class="font-bold">B</span>
+              </button>
+              <button type="button" onclick="toggleItalic()" class="px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors">
+                <span class="italic">I</span>
+              </button>
+            </div>
+
+            <!-- Área de escritura -->
+            <textarea id="chapter-content" placeholder="Comienza a escribir tu capítulo aquí...
+
+¡Deja volar tu imaginación!" 
+                      class="w-full p-6 border-2 border-gray-200 rounded-xl focus:border-[#FE2C55] focus:ring-2 focus:ring-pink-200 outline-none resize-none transition-all leading-relaxed" 
+                      style="font-size:16px; font-family: Georgia, serif; min-height: 400px;" 
+                      oninput="updateWordCount()" required></textarea>
+          </div>
+
+          <!-- Botón publicar mobile -->
+          <button type="submit" class="w-full bg-gradient-to-r from-[#FE2C55] to-pink-400 text-white py-4 rounded-xl font-bold text-lg hover:from-red-600 hover:to-pink-500 transition-all shadow-lg">
+            🚀 Publicar Capítulo
+          </button>
+        </form>
+
+        <!-- Tips para escritores -->
+        <div class="mt-6 bg-gradient-to-r from-pink-50 to-rose-50 rounded-2xl p-6 border border-pink-200">
+          <h3 class="font-bold text-sm mb-3 text-[#FE2C55]">💡 Consejos de escritura</h3>
+          <ul class="space-y-2 text-xs text-gray-600">
+            <li class="flex items-start">
+              <span class="mr-2">✨</span>
+              <span>Escribe de forma consistente para mantener a tus lectores enganchados</span>
+            </li>
+            <li class="flex items-start">
+              <span class="mr-2">📚</span>
+              <span>Revisa tu ortografía y gramática antes de publicar</span>
+            </li>
+            <li class="flex items-start">
+              <span class="mr-2">💬</span>
+              <span>Interactúa con los comentarios de tus lectores</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
+
+<script>
+let currentChapterFontSize = 16;
+
+function toggleScheduleSection() {
+  const toggle = document.getElementById('schedule-toggle');
+  const section = document.getElementById('schedule-section');
+  section.classList.toggle('hidden', !toggle.checked);
+}
+
+function applyFontFamily(fontFamily) {
+  const textarea = document.getElementById('chapter-content');
+  textarea.style.fontFamily = fontFamily;
+}
+
+function adjustFontSize(change) {
+  currentChapterFontSize += change * 2;
+  if (currentChapterFontSize < 12) currentChapterFontSize = 12;
+  if (currentChapterFontSize > 24) currentChapterFontSize = 24;
+  
+  const textarea = document.getElementById('chapter-content');
+  textarea.style.fontSize = currentChapterFontSize + 'px';
+  document.getElementById('font-size-display').textContent = currentChapterFontSize + 'px';
+}
+
+function updateWordCount() {
+  const content = document.getElementById('chapter-content').value;
+  const words = content.trim().split(/\s+/).filter(word => word.length > 0).length;
+  const chars = content.length;
+  
+  document.getElementById('word-count').textContent = words + ' palabras';
+  document.getElementById('char-count').textContent = chars + ' caracteres';
+}
+
+function saveChapterFromHeader() {
+  document.getElementById('chapter-form').dispatchEvent(new Event('submit'));
+}
+
+function toggleBold() {
+  document.execCommand('bold', false, null);
+}
+
+function toggleItalic() {
+  document.execCommand('italic', false, null);
+}
+</script>
 
 <!-- MODAL DE LECTURA DE CAPÍTULO - DISEÑO MODERNO ESTILO WEBTOON/WATTPAD -->
 <div id="chapter-read-modal" class="fixed inset-0 z-50 hidden">
