@@ -6353,6 +6353,139 @@ if (document.readyState === 'loading') {
 
 
 // La inicialización de Firebase Auth se maneja en initializeAuthListener()
+
+// Sistema de recuperación de contraseña
+let resetEmailSentTime = 0;
+const RESEND_COOLDOWN = 60000; // 60 segundos
+
+function resetPassword() {
+  document.getElementById('password-reset-modal').classList.remove('hidden');
+  document.getElementById('reset-step-1').classList.remove('hidden');
+  document.getElementById('reset-step-2').classList.add('hidden');
+  document.getElementById('reset-step-3').classList.add('hidden');
+}
+
+function closePasswordResetModal() {
+  document.getElementById('password-reset-modal').classList.add('hidden');
+  document.getElementById('reset-email-input').value = '';
+  document.getElementById('reset-error').classList.add('hidden');
+}
+
+function sendPasswordResetEmail() {
+  const email = document.getElementById('reset-email-input').value;
+  const submitBtn = document.getElementById('reset-submit-btn');
+  const btnText = document.getElementById('reset-btn-text');
+  const loading = document.getElementById('reset-loading');
+  const errorDiv = document.getElementById('reset-error');
+  
+  if (!email) {
+    showResetError('Por favor ingresa tu correo electrónico');
+    return;
+  }
+  
+  // Mostrar loading
+  btnText.classList.add('hidden');
+  loading.classList.remove('hidden');
+  submitBtn.disabled = true;
+  
+  firebase.auth().sendPasswordResetEmail(email)
+    .then(() => {
+      // Ocultar paso 1, mostrar paso 2
+      document.getElementById('reset-step-1').classList.add('hidden');
+      document.getElementById('reset-step-2').classList.remove('hidden');
+      document.getElementById('reset-email-display').textContent = email;
+      resetEmailSentTime = Date.now();
+      startResendTimer();
+    })
+    .catch((error) => {
+      showResetError(getErrorMessage(error.code));
+    })
+    .finally(() => {
+      btnText.classList.remove('hidden');
+      loading.classList.add('hidden');
+      submitBtn.disabled = false;
+    });
+}
+
+function resendPasswordResetEmail() {
+  const email = document.getElementById('reset-email-display').textContent;
+  const resendBtn = document.getElementById('resend-email-btn');
+  const btnText = document.getElementById('resend-btn-text');
+  const loading = document.getElementById('resend-loading');
+  
+  // Verificar cooldown
+  if (Date.now() - resetEmailSentTime < RESEND_COOLDOWN) {
+    return;
+  }
+  
+  btnText.classList.add('hidden');
+  loading.classList.remove('hidden');
+  resendBtn.disabled = true;
+  
+  firebase.auth().sendPasswordResetEmail(email)
+    .then(() => {
+      resetEmailSentTime = Date.now();
+      document.getElementById('reset-success').classList.remove('hidden');
+      setTimeout(() => {
+        document.getElementById('reset-success').classList.add('hidden');
+      }, 3000);
+      startResendTimer();
+    })
+    .catch((error) => {
+      alert('Error: ' + getErrorMessage(error.code));
+    })
+    .finally(() => {
+      btnText.classList.remove('hidden');
+      loading.classList.add('hidden');
+    });
+}
+
+function startResendTimer() {
+  const timerDiv = document.getElementById('resend-timer');
+  const resendBtn = document.getElementById('resend-email-btn');
+  
+  timerDiv.classList.remove('hidden');
+  resendBtn.disabled = true;
+  
+  const interval = setInterval(() => {
+    const timeLeft = RESEND_COOLDOWN - (Date.now() - resetEmailSentTime);
+    
+    if (timeLeft <= 0) {
+      clearInterval(interval);
+      timerDiv.classList.add('hidden');
+      resendBtn.disabled = false;
+    } else {
+      const seconds = Math.ceil(timeLeft / 1000);
+      timerDiv.textContent = `Podrás reenviar en ${seconds} segundos`;
+    }
+  }, 1000);
+}
+
+function goToFinalStep() {
+  document.getElementById('reset-step-2').classList.add('hidden');
+  document.getElementById('reset-step-3').classList.remove('hidden');
+}
+
+function goBackToLogin() {
+  closePasswordResetModal();
+}
+
+function showResetError(message) {
+  const errorDiv = document.getElementById('reset-error');
+  const errorText = document.getElementById('reset-error-text');
+  errorText.textContent = message;
+  errorDiv.classList.remove('hidden');
+}
+
+function getErrorMessage(errorCode) {
+  const messages = {
+    'auth/user-not-found': 'No existe una cuenta con este correo electrónico',
+    'auth/invalid-email': 'Correo electrónico inválido',
+    'auth/too-many-requests': 'Demasiados intentos. Intenta más tarde',
+    'auth/network-request-failed': 'Error de conexión. Verifica tu internet'
+  };
+  return messages[errorCode] || 'Ocurrió un error. Intenta de nuevo';
+}
 </script>
 
           </div>
