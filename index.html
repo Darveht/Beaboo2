@@ -5956,7 +5956,7 @@ function saveNote() {
       </div>
 
       <!-- Formulario -->
-      <form id="story-creation-form" class="space-y-6">
+      <form id="story-creation-form" class="space-y-6" onsubmit="createNewStory(event)">
         <!-- Título -->
         <div class="bg-white rounded-2xl p-6 border border-pink-200 shadow-sm">
           <label class="block text-sm font-semibold mb-2 text-gray-700">
@@ -6045,6 +6045,148 @@ function saveNote() {
     </div>
   </div>
 </div>
+
+<script>
+// Función para crear nueva historia
+function createNewStory(event) {
+  event.preventDefault();
+  
+  const user = firebase.auth().currentUser;
+  if (!user) {
+    alert('Debes iniciar sesión para crear una historia');
+    return;
+  }
+
+  const title = document.getElementById('story-title-input').value;
+  const description = document.getElementById('story-description-input').value;
+  const category = document.getElementById('story-category-input').value;
+  const coverFile = document.getElementById('story-cover-input').files[0];
+
+  if (!title || !description || !category) {
+    alert('Por favor completa todos los campos');
+    return;
+  }
+
+  // Convertir imagen de portada a base64
+  if (coverFile) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      saveStoryToFirebase(title, description, category, e.target.result);
+    };
+    reader.readAsDataURL(coverFile);
+  } else {
+    saveStoryToFirebase(title, description, category, 'https://via.placeholder.com/600x800/cccccc/666666?text=No+Cover');
+  }
+}
+
+// Guardar historia en Firebase
+function saveStoryToFirebase(title, description, category, coverImage) {
+  const user = firebase.auth().currentUser;
+  
+  const storyData = {
+    title: title,
+    description: description,
+    category: category,
+    coverImage: coverImage,
+    userId: user.uid,
+    createdAt: Date.now(),
+    views: 0,
+    rating: 0,
+    ratingCount: 0,
+    chapters: {}
+  };
+
+  const newStoryRef = firebase.database().ref('stories').push();
+  newStoryRef.set(storyData).then(() => {
+    // Mostrar mensaje de éxito
+    showSuccessMessage('¡Historia creada exitosamente!');
+    
+    // Cerrar vista de creación
+    closeStoryCreation();
+    
+    // Preguntar si quiere agregar un capítulo
+    setTimeout(() => {
+      if (confirm('¿Deseas agregar el primer capítulo ahora?')) {
+        openChapterCreationForStory(newStoryRef.key, storyData);
+      }
+    }, 500);
+  }).catch(error => {
+    console.error('Error al crear historia:', error);
+    alert('Hubo un error al crear la historia. Inténtalo de nuevo.');
+  });
+}
+
+// Abrir modal de creación de capítulo para una historia específica
+function openChapterCreationForStory(storyId, storyData) {
+  currentEditingStory = {
+    id: storyId,
+    ...storyData
+  };
+  
+  document.getElementById('chapter-creation-modal').classList.remove('hidden');
+  document.getElementById('chapter-creation-title').textContent = 'Nuevo Capítulo - ' + storyData.title;
+  
+  // Limpiar campos
+  document.getElementById('chapter-title-input').value = '';
+  document.getElementById('chapter-content').value = '';
+  document.getElementById('chapter-schedule').value = '';
+  document.getElementById('schedule-toggle').checked = false;
+  document.getElementById('schedule-section').classList.add('hidden');
+}
+
+// Función para mostrar mensaje de éxito
+function showSuccessMessage(message) {
+  const notification = document.createElement('div');
+  notification.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-[70] flex items-center';
+  notification.innerHTML = `
+    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+    </svg>
+    ${message}
+  `;
+  document.body.appendChild(notification);
+  
+  setTimeout(() => {
+    notification.style.opacity = '0';
+    notification.style.transform = 'translate(-50%, -20px)';
+    notification.style.transition = 'all 0.3s ease-out';
+    setTimeout(() => notification.remove(), 300);
+  }, 3000);
+}
+
+// Función para previsualizar portada
+function previewStoryCover(event) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('cover-upload-area').classList.add('hidden');
+      document.getElementById('cover-preview-area').classList.remove('hidden');
+      document.getElementById('cover-preview-img').src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+// Función para remover previsualización de portada
+function removeCoverPreview(event) {
+  event.stopPropagation();
+  document.getElementById('cover-upload-area').classList.remove('hidden');
+  document.getElementById('cover-preview-area').classList.add('hidden');
+  document.getElementById('story-cover-input').value = '';
+}
+
+// Función para cerrar vista de creación de historia
+function closeStoryCreation() {
+  document.getElementById('story-creation-view').classList.add('hidden');
+  document.getElementById('main-app').classList.remove('hidden');
+  
+  // Limpiar formulario
+  document.getElementById('story-creation-form').reset();
+  document.getElementById('cover-upload-area').classList.remove('hidden');
+  document.getElementById('cover-preview-area').classList.add('hidden');
+}
+</script>
 
 <!-- MODAL DE EDICIÓN DE CÓMICS -->
 <div id="comic-edit-view" class="fixed inset-0 overflow-y-auto z-50 hidden bg-gradient-to-b from-white to-[#f9f9f9] text-black">
@@ -6135,7 +6277,7 @@ function saveNote() {
           <span>Cancelar</span>
         </button>
         <h2 id="chapter-creation-title" class="text-xl font-bold">Nuevo Capítulo</h2>
-        <button id="btn-save-chapter-header" type="button" onclick="saveChapterFromHeader()" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg font-medium transition-colors">
+        <button id="btn-save-chapter-header" type="button" onclick="saveChapter()" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg font-medium transition-colors">
           Publicar
         </button>
       </div>
@@ -6220,10 +6362,81 @@ function saveNote() {
           </div>
 
           <!-- Botón publicar mobile -->
-          <button type="submit" class="w-full bg-gradient-to-r from-[#FE2C55] to-pink-400 text-white py-4 rounded-xl font-bold text-lg hover:from-red-600 hover:to-pink-500 transition-all shadow-lg">
+          <button type="button" onclick="saveChapter()" class="w-full bg-gradient-to-r from-[#FE2C55] to-pink-400 text-white py-4 rounded-xl font-bold text-lg hover:from-red-600 hover:to-pink-500 transition-all shadow-lg">
             🚀 Publicar Capítulo
           </button>
         </form>
+        
+        <script>
+        // Variable global para la historia actual
+        let currentEditingStory = null;
+        
+        // Función para guardar capítulo
+        function saveChapter() {
+          if (!currentEditingStory) {
+            alert('No hay una historia seleccionada');
+            return;
+          }
+          
+          const title = document.getElementById('chapter-title-input').value;
+          const content = document.getElementById('chapter-content').value;
+          const scheduleToggle = document.getElementById('schedule-toggle').checked;
+          const scheduleTime = document.getElementById('chapter-schedule').value;
+          
+          if (!title || !content) {
+            alert('Por favor completa el título y el contenido del capítulo');
+            return;
+          }
+          
+          const chapterData = {
+            title: title,
+            content: content,
+            createdAt: Date.now(),
+            order: Object.keys(currentEditingStory.chapters || {}).length,
+            scheduled: scheduleToggle,
+            scheduleTime: scheduleTime ? new Date(scheduleTime).getTime() : null,
+            published: !scheduleToggle
+          };
+          
+          // Guardar en Firebase
+          const chapterRef = firebase.database().ref('stories/' + currentEditingStory.id + '/chapters').push();
+          chapterRef.set(chapterData).then(() => {
+            showSuccessMessage('¡Capítulo publicado exitosamente!');
+            closeChapterCreationModal();
+            
+            // Recargar la historia si estamos en la vista de edición
+            if (document.getElementById('comic-edit-view').classList.contains('hidden') === false) {
+              loadStoryForEdit(currentEditingStory.id);
+            }
+          }).catch(error => {
+            console.error('Error al publicar capítulo:', error);
+            alert('Hubo un error al publicar el capítulo');
+          });
+        }
+        
+        // Función para cerrar modal de creación de capítulo
+        function closeChapterCreationModal() {
+          document.getElementById('chapter-creation-modal').classList.add('hidden');
+          
+          // Limpiar campos
+          document.getElementById('chapter-title-input').value = '';
+          document.getElementById('chapter-content').value = '';
+          document.getElementById('chapter-schedule').value = '';
+          document.getElementById('schedule-toggle').checked = false;
+          document.getElementById('schedule-section').classList.add('hidden');
+        }
+        
+        // Función para abrir modal de creación de capítulo desde edición de historia
+        function openChapterCreationModal() {
+          if (!currentEditingStory) {
+            alert('Primero debes seleccionar una historia');
+            return;
+          }
+          
+          document.getElementById('chapter-creation-modal').classList.remove('hidden');
+          document.getElementById('chapter-creation-title').textContent = 'Nuevo Capítulo - ' + currentEditingStory.title;
+        }
+        </script>
 
         <!-- Tips para escritores -->
         <div class="mt-6 bg-gradient-to-r from-pink-50 to-rose-50 rounded-2xl p-6 border border-pink-200">
