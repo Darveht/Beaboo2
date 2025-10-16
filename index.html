@@ -2192,8 +2192,9 @@
   <!-- Contenedor de video vertical -->
   <div id="video-container" class="h-full w-full flex items-center justify-center relative">
     <!-- Video -->
-    <video id="newhot-video" class="h-full w-auto max-w-full object-contain" playsinline loop>
-      <source src="https://www.dropbox.com/scl/fi/zj06scl4l4etg6ij60r3j/copy_8FBD68E3-DA2B-46A2-8D0F-2A20EE10AF5F.mov?rlkey=o9dzugdhfdfljcnrjkw5rueex&st=bbso6j90&dl=1" type="video/mp4">
+    <video id="newhot-video" class="h-full w-auto max-w-full object-contain" controls playsinline loop autoplay muted>
+      <source src="https://www.dropbox.com/scl/fi/zj06scl4l4etg6ij60r3j/copy_8FBD68E3-DA2B-46A2-8D0F-2A20EE10AF5F.mov?rlkey=o9dzugdhfdfljcnrjkw5rueex&st=hkttv9my&raw=1" type="video/mp4">
+      Tu navegador no soporta el elemento de video.
     </video>
 
     <!-- Información del video (lado derecho) -->
@@ -2913,6 +2914,56 @@ Gracias por usar BeaBoo de forma segura.
       // Programar eliminación automática
       setTimeout(() => {
         firebase.database().ref('conversations/' + conversationId + '/messages').orderByChild('type').equalTo('security_pin').once('value').then(snapshot => {
+
+
+<script>
+// Funciones para controlar el reproductor de New&Hot
+function openNewHot() {
+  const newHotView = document.getElementById('newhot-view');
+  const video = document.getElementById('newhot-video');
+  const mainApp = document.getElementById('main-app');
+  
+  if (newHotView && video && mainApp) {
+    newHotView.classList.remove('hidden');
+    mainApp.classList.add('hidden');
+    
+    // Reproducir automáticamente cuando se abre la vista
+    setTimeout(() => {
+      video.play().catch(error => {
+        console.log('Autoplay bloqueado, el usuario debe interactuar:', error);
+      });
+    }, 100);
+  }
+}
+
+function closeNewHot() {
+  const newHotView = document.getElementById('newhot-view');
+  const video = document.getElementById('newhot-video');
+  const mainApp = document.getElementById('main-app');
+  
+  if (newHotView && video && mainApp) {
+    video.pause();
+    video.currentTime = 0;
+    newHotView.classList.add('hidden');
+    mainApp.classList.remove('hidden');
+  }
+}
+
+// Toggle play/pause al hacer clic en el video
+document.addEventListener('DOMContentLoaded', function() {
+  const video = document.getElementById('newhot-video');
+  if (video) {
+    video.addEventListener('click', function() {
+      if (video.paused) {
+        video.play();
+      } else {
+        video.pause();
+      }
+    });
+  }
+});
+</script>
+
           snapshot.forEach(child => {
             if (child.val().autoDelete && Date.now() >= child.val().deleteAt) {
               child.ref.remove();
