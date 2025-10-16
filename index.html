@@ -1997,6 +1997,726 @@
             <p class="text-sm text-yellow-700">Los reportes falsos pueden resultar en restricciones en tu cuenta. Solo reporta contenido que realmente viole nuestras normas.</p>
           </div>
         </div>
+
+
+<!-- VISTA DE VIDEOS/REELS - ESTILO TIKTOK -->
+<div id="videos-section" class="fixed inset-0 bg-black text-white overflow-y-auto hidden z-50">
+  <div class="min-h-screen w-full pb-20">
+    <!-- Header -->
+    <div class="sticky top-0 z-10 bg-black/90 backdrop-blur-md border-b border-gray-800 p-4">
+      <div class="flex items-center justify-between max-w-4xl mx-auto">
+        <button onclick="closeVideosSection()" class="text-white font-medium flex items-center hover:text-[#FE2C55] transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          <span>Volver</span>
+        </button>
+        <h1 class="text-xl font-bold">Videos</h1>
+        <div class="w-20"></div>
+      </div>
+    </div>
+
+    <!-- Tabs: New y Reels -->
+    <div class="flex border-b border-gray-800 sticky top-16 z-10 bg-black">
+      <button onclick="switchVideoTab('new')" id="tab-new" class="flex-1 py-3 text-center font-medium border-b-2 border-[#FE2C55] text-[#FE2C55]">
+        New
+      </button>
+      <button onclick="switchVideoTab('reels')" id="tab-reels" class="flex-1 py-3 text-center font-medium text-gray-400">
+        Reels
+      </button>
+    </div>
+
+    <!-- Contenido de New (Feed de videos) -->
+    <div id="new-feed" class="max-w-4xl mx-auto">
+      <div id="videos-feed" class="space-y-4 p-4">
+        <!-- Los videos se cargarán aquí desde Firebase -->
+      </div>
+      
+      <!-- Estado vacío -->
+      <div id="no-videos-message" class="text-center py-12 hidden">
+        <div class="w-20 h-20 mx-auto mb-4 bg-gray-800 rounded-full flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-400 mb-2">No hay videos aún</h3>
+        <p class="text-gray-500">Sé el primero en compartir un video</p>
+      </div>
+    </div>
+
+    <!-- Contenido de Reels (Guardados) -->
+    <div id="reels-feed" class="max-w-4xl mx-auto hidden">
+      <div id="saved-videos-feed" class="space-y-4 p-4">
+        <!-- Los videos guardados se cargarán aquí -->
+      </div>
+      
+      <!-- Estado vacío -->
+      <div id="no-saved-videos" class="text-center py-12">
+        <div class="w-20 h-20 mx-auto mb-4 bg-gray-800 rounded-full flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-400 mb-2">No has guardado videos</h3>
+        <p class="text-gray-500">Los videos que guardes aparecerán aquí</p>
+      </div>
+    </div>
+
+    <!-- Botón flotante para subir video -->
+    <button onclick="openUploadVideoModal()" class="fixed bottom-24 right-6 w-14 h-14 bg-gradient-to-r from-[#FE2C55] to-pink-400 rounded-full flex items-center justify-center shadow-xl hover:scale-110 transition-transform z-20">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+      </svg>
+    </button>
+  </div>
+</div>
+
+<!-- MODAL DE SUBIDA DE VIDEO -->
+<div id="upload-video-modal" class="fixed inset-0 bg-black z-60 hidden">
+  <div class="w-full h-full flex flex-col">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-[#FE2C55] to-pink-400 p-4 text-white">
+      <div class="flex items-center justify-between max-w-5xl mx-auto">
+        <button onclick="closeUploadVideoModal()" class="flex items-center hover:bg-white/20 px-3 py-2 rounded-lg transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          <span>Cancelar</span>
+        </button>
+        <h2 class="text-xl font-bold">Subir Video</h2>
+        <button id="btn-publish-video" onclick="publishVideo()" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg font-medium transition-colors">
+          Publicar
+        </button>
+      </div>
+    </div>
+
+    <!-- Contenido -->
+    <div class="flex-1 overflow-y-auto bg-black p-6">
+      <div class="max-w-3xl mx-auto">
+        <form id="upload-video-form" class="space-y-6">
+          
+          <!-- Subir video -->
+          <div class="bg-gray-900 rounded-2xl p-6 border border-gray-800">
+            <label class="block text-sm font-semibold mb-3 text-gray-300">
+              📹 Selecciona tu video (máx. 10 segundos)
+            </label>
+            <div id="video-upload-area" class="border-2 border-dashed border-gray-700 rounded-xl p-8 text-center hover:border-[#FE2C55] transition-colors cursor-pointer" onclick="document.getElementById('video-file-input').click()">
+              <input type="file" id="video-file-input" accept="video/*" class="hidden" onchange="handleVideoSelect(event)">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-600 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+              <p class="text-gray-400">Haz clic para seleccionar un video</p>
+              <p class="text-sm text-gray-500 mt-1">MP4, MOV, AVI (Máx. 10 segundos)</p>
+            </div>
+            
+            <!-- Preview del video -->
+            <div id="video-preview-area" class="hidden mt-4">
+              <video id="video-preview" controls class="w-full max-h-64 rounded-lg"></video>
+              <div class="flex items-center justify-between mt-2">
+                <span id="video-duration" class="text-sm text-gray-400"></span>
+                <button type="button" onclick="removeVideoPreview()" class="text-red-500 text-sm hover:text-red-400">
+                  ✕ Eliminar video
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Descripción -->
+          <div class="bg-gray-900 rounded-2xl p-6 border border-gray-800">
+            <label class="block text-sm font-semibold mb-2 text-gray-300">
+              ✍️ Descripción
+            </label>
+            <textarea id="video-description" placeholder="Escribe una descripción..." maxlength="200"
+                      class="w-full p-4 border-2 border-gray-700 bg-black rounded-xl focus:border-[#FE2C55] focus:ring-2 focus:ring-pink-200 outline-none resize-none transition-all text-white" 
+                      rows="3"></textarea>
+            <div class="text-right mt-1">
+              <span id="description-count" class="text-sm text-gray-500">0/200</span>
+            </div>
+          </div>
+
+          <!-- Anclar a historia (opcional) -->
+          <div class="bg-gray-900 rounded-2xl p-6 border border-gray-800">
+            <label class="flex items-center justify-between cursor-pointer mb-3">
+              <div>
+                <span class="text-sm font-semibold text-gray-300">📚 Anclar a una historia</span>
+                <p class="text-xs text-gray-500 mt-1">Vincula este video a una de tus historias</p>
+              </div>
+              <input type="checkbox" id="anchor-story-toggle" class="toggle-checkbox" onchange="toggleStoryAnchor()">
+            </label>
+            
+            <div id="story-anchor-section" class="hidden mt-4">
+              <div class="relative">
+                <input type="text" id="story-search-input" placeholder="Buscar mis historias..." 
+                       class="w-full p-3 border-2 border-gray-700 bg-black rounded-xl focus:border-[#FE2C55] outline-none text-white"
+                       oninput="searchUserStories(this.value)">
+                <div id="stories-list" class="mt-2 max-h-40 overflow-y-auto space-y-2">
+                  <!-- Las historias se cargarán aquí -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DE PROGRESO DE SUBIDA -->
+<div id="upload-progress-modal" class="fixed inset-0 bg-black/90 z-70 hidden flex items-center justify-center">
+  <div class="bg-gray-900 rounded-2xl p-8 max-w-md w-full mx-4 text-center">
+    <div class="mb-6">
+      <div class="w-20 h-20 mx-auto mb-4 relative">
+        <svg class="animate-spin h-20 w-20 text-[#FE2C55]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      </div>
+      <h3 class="text-xl font-bold text-white mb-2">Subiendo tu video...</h3>
+      <p class="text-gray-400 mb-4">Por favor espera mientras procesamos tu contenido</p>
+      
+      <!-- Barra de progreso -->
+      <div class="w-full bg-gray-700 rounded-full h-3 mb-2">
+        <div id="upload-progress-bar" class="bg-gradient-to-r from-[#FE2C55] to-pink-400 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+      </div>
+      <p id="upload-progress-text" class="text-sm text-gray-400">0%</p>
+    </div>
+    
+    <div class="space-y-2 text-left">
+      <div class="flex items-center text-sm text-gray-400">
+        <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+        </svg>
+        <span>Procesando video...</span>
+      </div>
+      <div class="flex items-center text-sm text-gray-400">
+        <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+        </svg>
+        <span>Subiendo a la nube...</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Variables globales para videos
+let selectedVideoFile = null;
+let selectedStoryId = null;
+const PUBLITIO_API_KEY = 'k3e2THlTmAqaX7Vudg0Z';
+const PUBLITIO_API_SECRET = 't1DwdLf2Gd4MJHXDvMkwfsQoR541k38m';
+
+// Abrir sección de videos
+function openVideosSection() {
+  document.getElementById('videos-section').classList.remove('hidden');
+  document.getElementById('main-app').classList.add('hidden');
+  loadVideosFeed();
+}
+
+// Cerrar sección de videos
+function closeVideosSection() {
+  document.getElementById('videos-section').classList.add('hidden');
+  document.getElementById('main-app').classList.remove('hidden');
+}
+
+// Cambiar entre tabs
+function switchVideoTab(tab) {
+  const newTab = document.getElementById('tab-new');
+  const reelsTab = document.getElementById('tab-reels');
+  const newFeed = document.getElementById('new-feed');
+  const reelsFeed = document.getElementById('reels-feed');
+  
+  if (tab === 'new') {
+    newTab.classList.add('border-[#FE2C55]', 'text-[#FE2C55]');
+    newTab.classList.remove('text-gray-400');
+    reelsTab.classList.remove('border-[#FE2C55]', 'text-[#FE2C55]');
+    reelsTab.classList.add('text-gray-400');
+    newFeed.classList.remove('hidden');
+    reelsFeed.classList.add('hidden');
+  } else {
+    reelsTab.classList.add('border-[#FE2C55]', 'text-[#FE2C55]');
+    reelsTab.classList.remove('text-gray-400');
+    newTab.classList.remove('border-[#FE2C55]', 'text-[#FE2C55]');
+    newTab.classList.add('text-gray-400');
+    reelsFeed.classList.remove('hidden');
+    newFeed.classList.add('hidden');
+    loadSavedVideos();
+  }
+}
+
+// Cargar feed de videos
+function loadVideosFeed() {
+  const feedContainer = document.getElementById('videos-feed');
+  const noVideosMessage = document.getElementById('no-videos-message');
+  
+  firebase.database().ref('videos').orderByChild('timestamp').limitToLast(50).on('value', snapshot => {
+    feedContainer.innerHTML = '';
+    
+    if (!snapshot.exists()) {
+      noVideosMessage.classList.remove('hidden');
+      return;
+    }
+    
+    noVideosMessage.classList.add('hidden');
+    const videos = [];
+    
+    snapshot.forEach(child => {
+      videos.unshift({
+        id: child.key,
+        ...child.val()
+      });
+    });
+    
+    videos.forEach(video => {
+      const videoCard = createVideoCard(video);
+      feedContainer.appendChild(videoCard);
+    });
+  });
+}
+
+// Crear tarjeta de video
+function createVideoCard(video) {
+  const card = document.createElement('div');
+  card.className = 'bg-gray-900 rounded-xl overflow-hidden border border-gray-800';
+  
+  // Obtener info del usuario
+  firebase.database().ref('users/' + video.userId).once('value').then(userSnap => {
+    const userData = userSnap.val();
+    
+    card.innerHTML = `
+      <div class="p-4">
+        <div class="flex items-center space-x-3 mb-3">
+          <img src="${userData.profileImage || 'https://via.placeholder.com/40'}" alt="${userData.username}" class="w-10 h-10 rounded-full object-cover">
+          <div class="flex-1">
+            <p class="font-semibold text-white">${userData.username}</p>
+            <p class="text-xs text-gray-400">${formatTimestamp(video.timestamp)}</p>
+          </div>
+          ${video.storyId ? `<button onclick="openStoryFromVideo('${video.storyId}')" class="bg-[#FE2C55] text-white px-3 py-1 rounded-full text-xs hover:bg-red-600 transition-colors">Start Reading</button>` : ''}
+        </div>
+        
+        <video controls class="w-full rounded-lg mb-3" preload="metadata">
+          <source src="${video.videoUrl}" type="video/mp4">
+        </video>
+        
+        <p class="text-white mb-3">${video.description || ''}</p>
+        
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-4">
+            <button onclick="toggleVideoLike('${video.id}')" class="flex items-center space-x-1 text-gray-400 hover:text-[#FE2C55] transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+              <span id="likes-${video.id}">${video.likes || 0}</span>
+            </button>
+            
+            <button onclick="shareVideo('${video.id}')" class="flex items-center space-x-1 text-gray-400 hover:text-blue-400 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+              </svg>
+            </button>
+          </div>
+          
+          <button onclick="toggleSaveVideo('${video.id}')" id="save-${video.id}" class="text-gray-400 hover:text-yellow-400 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    `;
+  });
+  
+  return card;
+}
+
+// Abrir modal de subida
+function openUploadVideoModal() {
+  const user = firebase.auth().currentUser;
+  if (!user) {
+    alert('Debes iniciar sesión para subir videos');
+    return;
+  }
+  document.getElementById('upload-video-modal').classList.remove('hidden');
+}
+
+// Cerrar modal de subida
+function closeUploadVideoModal() {
+  document.getElementById('upload-video-modal').classList.add('hidden');
+  selectedVideoFile = null;
+  selectedStoryId = null;
+  document.getElementById('upload-video-form').reset();
+  document.getElementById('video-upload-area').classList.remove('hidden');
+  document.getElementById('video-preview-area').classList.add('hidden');
+}
+
+// Manejar selección de video
+function handleVideoSelect(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  // Validar tipo de archivo
+  if (!file.type.startsWith('video/')) {
+    alert('Por favor selecciona un archivo de video válido');
+    return;
+  }
+  
+  // Validar duración del video
+  const video = document.createElement('video');
+  video.preload = 'metadata';
+  
+  video.onloadedmetadata = function() {
+    window.URL.revokeObjectURL(video.src);
+    
+    if (video.duration > 10) {
+      alert('El video no debe superar los 10 segundos');
+      event.target.value = '';
+      return;
+    }
+    
+    // Mostrar preview
+    selectedVideoFile = file;
+    document.getElementById('video-upload-area').classList.add('hidden');
+    document.getElementById('video-preview-area').classList.remove('hidden');
+    
+    const preview = document.getElementById('video-preview');
+    preview.src = URL.createObjectURL(file);
+    
+    document.getElementById('video-duration').textContent = `Duración: ${Math.round(video.duration)}s`;
+  };
+  
+  video.src = URL.createObjectURL(file);
+}
+
+// Remover preview
+function removeVideoPreview() {
+  selectedVideoFile = null;
+  document.getElementById('video-file-input').value = '';
+  document.getElementById('video-upload-area').classList.remove('hidden');
+  document.getElementById('video-preview-area').classList.add('hidden');
+}
+
+// Toggle anclar historia
+function toggleStoryAnchor() {
+  const toggle = document.getElementById('anchor-story-toggle');
+  const section = document.getElementById('story-anchor-section');
+  section.classList.toggle('hidden', !toggle.checked);
+  
+  if (toggle.checked) {
+    loadUserStories();
+  }
+}
+
+// Cargar historias del usuario
+function loadUserStories() {
+  const user = firebase.auth().currentUser;
+  if (!user) return;
+  
+  firebase.database().ref('stories').orderByChild('userId').equalTo(user.uid).once('value').then(snapshot => {
+    const storiesList = document.getElementById('stories-list');
+    storiesList.innerHTML = '';
+    
+    if (!snapshot.exists()) {
+      storiesList.innerHTML = '<p class="text-gray-500 text-sm">No tienes historias publicadas</p>';
+      return;
+    }
+    
+    snapshot.forEach(child => {
+      const story = child.val();
+      const storyItem = document.createElement('div');
+      storyItem.className = 'p-3 bg-gray-800 rounded-lg hover:bg-gray-700 cursor-pointer transition-colors';
+      storyItem.onclick = () => selectStory(child.key, story.title);
+      storyItem.innerHTML = `
+        <div class="flex items-center space-x-3">
+          <img src="${story.coverImage || 'https://via.placeholder.com/40'}" alt="${story.title}" class="w-10 h-10 rounded object-cover">
+          <p class="text-white text-sm flex-1">${story.title}</p>
+        </div>
+      `;
+      storiesList.appendChild(storyItem);
+    });
+  });
+}
+
+// Buscar historias del usuario
+function searchUserStories(query) {
+  const user = firebase.auth().currentUser;
+  if (!user) return;
+  
+  firebase.database().ref('stories').orderByChild('userId').equalTo(user.uid).once('value').then(snapshot => {
+    const storiesList = document.getElementById('stories-list');
+    storiesList.innerHTML = '';
+    
+    const stories = [];
+    snapshot.forEach(child => {
+      const story = child.val();
+      if (story.title.toLowerCase().includes(query.toLowerCase())) {
+        stories.push({ id: child.key, ...story });
+      }
+    });
+    
+    if (stories.length === 0) {
+      storiesList.innerHTML = '<p class="text-gray-500 text-sm">No se encontraron historias</p>';
+      return;
+    }
+    
+    stories.forEach(story => {
+      const storyItem = document.createElement('div');
+      storyItem.className = 'p-3 bg-gray-800 rounded-lg hover:bg-gray-700 cursor-pointer transition-colors';
+      storyItem.onclick = () => selectStory(story.id, story.title);
+      storyItem.innerHTML = `
+        <div class="flex items-center space-x-3">
+          <img src="${story.coverImage || 'https://via.placeholder.com/40'}" alt="${story.title}" class="w-10 h-10 rounded object-cover">
+          <p class="text-white text-sm flex-1">${story.title}</p>
+        </div>
+      `;
+      storiesList.appendChild(storyItem);
+    });
+  });
+}
+
+// Seleccionar historia
+function selectStory(storyId, storyTitle) {
+  selectedStoryId = storyId;
+  document.getElementById('stories-list').innerHTML = `
+    <div class="p-3 bg-[#FE2C55] rounded-lg">
+      <p class="text-white text-sm">✓ Historia seleccionada: ${storyTitle}</p>
+    </div>
+  `;
+}
+
+// Contador de caracteres de descripción
+document.addEventListener('DOMContentLoaded', function() {
+  const descriptionInput = document.getElementById('video-description');
+  if (descriptionInput) {
+    descriptionInput.addEventListener('input', function() {
+      const count = this.value.length;
+      document.getElementById('description-count').textContent = count + '/200';
+    });
+  }
+});
+
+// Publicar video
+async function publishVideo() {
+  if (!selectedVideoFile) {
+    alert('Por favor selecciona un video');
+    return;
+  }
+  
+  const user = firebase.auth().currentUser;
+  if (!user) return;
+  
+  const description = document.getElementById('video-description').value;
+  
+  // Mostrar modal de progreso
+  document.getElementById('upload-progress-modal').classList.remove('hidden');
+  
+  try {
+    // Subir a Publitio
+    const formData = new FormData();
+    formData.append('file', selectedVideoFile);
+    formData.append('api_key', PUBLITIO_API_KEY);
+    formData.append('api_secret', PUBLITIO_API_SECRET);
+    
+    const uploadResponse = await fetch('https://api.publit.io/v1/files/create', {
+      method: 'POST',
+      body: formData
+    });
+    
+    // Simular progreso
+    let progress = 0;
+    const progressInterval = setInterval(() => {
+      progress += 10;
+      document.getElementById('upload-progress-bar').style.width = progress + '%';
+      document.getElementById('upload-progress-text').textContent = progress + '%';
+      
+      if (progress >= 90) {
+        clearInterval(progressInterval);
+      }
+    }, 200);
+    
+    const uploadData = await uploadResponse.json();
+    
+    if (!uploadData.url_preview) {
+      throw new Error('Error al subir el video');
+    }
+    
+    // Completar progreso
+    clearInterval(progressInterval);
+    document.getElementById('upload-progress-bar').style.width = '100%';
+    document.getElementById('upload-progress-text').textContent = '100%';
+    
+    // Guardar en Firebase
+    const videoData = {
+      userId: user.uid,
+      videoUrl: uploadData.url_preview,
+      description: description,
+      storyId: selectedStoryId || null,
+      timestamp: Date.now(),
+      likes: 0
+    };
+    
+    await firebase.database().ref('videos').push(videoData);
+    
+    // Cerrar modales y mostrar éxito
+    setTimeout(() => {
+      document.getElementById('upload-progress-modal').classList.add('hidden');
+      closeUploadVideoModal();
+      showSuccessMessage('¡Video publicado exitosamente!');
+      loadVideosFeed();
+    }, 500);
+    
+  } catch (error) {
+    console.error('Error al publicar video:', error);
+    document.getElementById('upload-progress-modal').classList.add('hidden');
+    alert('Hubo un error al publicar el video. Inténtalo de nuevo.');
+  }
+}
+
+// Toggle like en video
+function toggleVideoLike(videoId) {
+  const user = firebase.auth().currentUser;
+  if (!user) return;
+  
+  const likeRef = firebase.database().ref('videoLikes/' + videoId + '/' + user.uid);
+  
+  likeRef.once('value').then(snapshot => {
+    if (snapshot.exists()) {
+      likeRef.remove();
+      firebase.database().ref('videos/' + videoId + '/likes').transaction(likes => (likes || 1) - 1);
+    } else {
+      likeRef.set(true);
+      firebase.database().ref('videos/' + videoId + '/likes').transaction(likes => (likes || 0) + 1);
+    }
+  });
+}
+
+// Toggle guardar video
+function toggleSaveVideo(videoId) {
+  const user = firebase.auth().currentUser;
+  if (!user) return;
+  
+  const saveRef = firebase.database().ref('savedVideos/' + user.uid + '/' + videoId);
+  
+  saveRef.once('value').then(snapshot => {
+    const btn = document.getElementById('save-' + videoId);
+    
+    if (snapshot.exists()) {
+      saveRef.remove();
+      btn.querySelector('svg').setAttribute('fill', 'none');
+      showSuccessMessage('Video eliminado de guardados');
+    } else {
+      saveRef.set(true);
+      btn.querySelector('svg').setAttribute('fill', 'currentColor');
+      showSuccessMessage('Video guardado exitosamente');
+    }
+  });
+}
+
+// Cargar videos guardados
+function loadSavedVideos() {
+  const user = firebase.auth().currentUser;
+  if (!user) return;
+  
+  const feedContainer = document.getElementById('saved-videos-feed');
+  const noSavedMessage = document.getElementById('no-saved-videos');
+  
+  firebase.database().ref('savedVideos/' + user.uid).on('value', snapshot => {
+    feedContainer.innerHTML = '';
+    
+    if (!snapshot.exists()) {
+      noSavedMessage.classList.remove('hidden');
+      return;
+    }
+    
+    noSavedMessage.classList.add('hidden');
+    
+    snapshot.forEach(child => {
+      const videoId = child.key;
+      firebase.database().ref('videos/' + videoId).once('value').then(videoSnap => {
+        const video = videoSnap.val();
+        if (video) {
+          const videoCard = createVideoCard({ id: videoId, ...video });
+          feedContainer.appendChild(videoCard);
+        }
+      });
+    });
+  });
+}
+
+// Compartir video
+function shareVideo(videoId) {
+  const shareUrl = window.location.origin + '?video=' + videoId;
+  
+  if (navigator.share) {
+    navigator.share({
+      title: 'Mira este video en BeaBoo',
+      url: shareUrl
+    });
+  } else {
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      showSuccessMessage('¡Enlace copiado al portapapeles!');
+    });
+  }
+}
+
+// Abrir historia desde video
+function openStoryFromVideo(storyId) {
+  firebase.database().ref('stories/' + storyId).once('value').then(snapshot => {
+    const story = snapshot.val();
+    if (story) {
+      closeVideosSection();
+      openStoryDetail({ id: storyId, ...story });
+    }
+  });
+}
+
+// Formatear timestamp
+function formatTimestamp(timestamp) {
+  const date = new Date(timestamp);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+  
+  if (diffMins < 1) return 'Ahora';
+  if (diffMins < 60) return diffMins + 'm';
+  if (diffHours < 24) return diffHours + 'h';
+  return diffDays + 'd';
+}
+</script>
+
+<style>
+.toggle-checkbox:checked {
+  background-color: #FE2C55;
+}
+
+.toggle-checkbox {
+  width: 3rem;
+  height: 1.5rem;
+  background-color: #4B5563;
+  border-radius: 9999px;
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.toggle-checkbox::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 1.25rem;
+  height: 1.25rem;
+  background-color: white;
+  border-radius: 9999px;
+  transition: transform 0.2s;
+}
+
+.toggle-checkbox:checked::after {
+  transform: translateX(1.5rem);
+}
+</style>
+
       </div>
 
       <form id="report-form" class="space-y-6">
@@ -3327,6 +4047,11 @@ firebase.auth().onAuthStateChanged(user => {
       <button onclick="openCreatorHub()" class="flex flex-col items-center justify-center text-[#161823] hover:text-[#FE2C55] transition">
         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        </svg>
+      </button>
+      <button onclick="openVideosSection()" class="flex flex-col items-center justify-center text-[#161823] hover:text-[#FE2C55] transition">
+        <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
         </svg>
       </button>
       <button onclick="openProfile()" class="flex flex-col items-center justify-center">
