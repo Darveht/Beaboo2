@@ -1557,66 +1557,9 @@
     }
   </style>
   <script>
-    /*********************** SISTEMA DE GESTIÓN DE FIREBASE (PREVIENE DUPLICADOS) ***********************/
-    let firebaseListeners = {
-      authListener: null,
-      databaseListeners: new Map(),
-      initialized: false
-    };
-
-    // Sistema unificado de autenticación (elimina duplicados)
-    function initializeFirebaseAuth() {
-      if (firebaseListeners.authListener) {
-        // Desconectar listener anterior si existe
-        firebaseListeners.authListener();
-        firebaseListeners.authListener = null;
-      }
-      
-      // Crear un solo listener de autenticación
-      firebaseListeners.authListener = firebase.auth().onAuthStateChanged(user => {
-        handleAuthStateChange(user);
-      });
-    }
-
-    // Función unificada para manejar cambios de autenticación
-    function handleAuthStateChange(user) {
-      if (user) {
-        // Usuario autenticado
-        if (!firebaseListeners.initialized) {
-          firebaseListeners.initialized = true;
-          setupUserListeners(user);
-          initializeStore();
-          loadFollowingStories();
-          listenForUnreadMessages();
-        }
-      } else {
-        // Usuario no autenticado
-        cleanupAllListeners();
-        firebaseListeners.initialized = false;
-      }
-    }
-
-    // Limpiar todos los listeners al desconectar
-    function cleanupAllListeners() {
-      firebaseListeners.databaseListeners.forEach((unsubscribe, key) => {
-        unsubscribe();
-      });
-      firebaseListeners.databaseListeners.clear();
-    }
-
-    // Agregar listener de database con gestión automática
-    function addDatabaseListener(key, ref, callback) {
-      // Limpiar listener anterior si existe
-      if (firebaseListeners.databaseListeners.has(key)) {
-        firebaseListeners.databaseListeners.get(key)();
-      }
-      
-      // Agregar nuevo listener
-      const unsubscribe = ref.on('value', callback);
-      firebaseListeners.databaseListeners.set(key, () => ref.off('value', unsubscribe));
-      
-      return unsubscribe;
-    }
+    /*********************** SISTEMA DE GESTIÓN DE FIREBASE (NOTA: Este sistema legacy no se usa) ***********************/
+    // Este código legacy ha sido reemplazado por initializeAuthListener() en línea 5812
+    // Se mantiene comentado por referencia histórica
 
     // Sistema de gestión de intervals (PREVIENE MEMORY LEAKS)
     let activeIntervals = new Map();
@@ -5821,28 +5764,100 @@ function initializeAuthListener() {
     if (user) {
       console.log('✅ Usuario autenticado:', user.email);
       
-      // Mostrar app principal inmediatamente
-      if (authFormContainer && mainApp) {
-        authFormContainer.classList.add('hidden');
-        mainApp.classList.remove('hidden');
+      // Verificar si está autorizado para transmisión en vivo
+      const liveTransmitBtn = document.getElementById('live-transmit-btn');
+      if (liveTransmitBtn) {
+        if (authorizedEmails.includes(user.email)) {
+          liveTransmitBtn.style.display = "block";
+        } else {
+          liveTransmitBtn.style.display = "none";
+        }
       }
       
-      // Cargar datos del usuario sin delay excesivo
-      setTimeout(() => {
-        setupAutoDetectors();
-        updateBottomNavProfilePic();
-        loadUserProfile();
-        loadInitialUserData(user);
+      // INICIALIZAR SISTEMA DE MONEDAS
+      updateCoinDisplay(user.uid);
+      
+      // CARGAR ESTADÍSTICAS EN TIEMPO REAL
+      loadUserStats(user.uid);
+      
+      // Verificar si el usuario está bloqueado
+      firebase.database().ref('users/' + user.uid).once('value').then(snapshot => {
+        const data = snapshot.val();
+        if (data && data.blocked && data.blockedUntil && Date.now() < data.blockedUntil) {
+          alert("Tu cuenta ha sido bloqueada por infracciones. Por favor, contacta con el soporte para recuperar el acceso.");
+          firebase.auth().signOut();
+          return;
+        }
+        
+        // Mostrar app principal
+        if (authFormContainer && mainApp) {
+          authFormContainer.classList.add('hidden');
+          mainApp.classList.remove('hidden');
+        }
         
         // Cargar contenido de la app
+        loadStories();
+        loadUserStories(user.uid);
+        loadSuggestedStories();
+        loadFeaturedAuthors();
         loadNewReleases();
         loadTop10();
         loadPopularStories();
         loadTerrorStories();
-        loadSuggestedStories();
-        loadFeaturedAuthors();
         loadFollowingStories();
-      }, 300);
+        
+        // Actualizar perfil del usuario
+        if (data) {
+          let displayName = data.username || "Usuario";
+          if (data.founder) {
+            displayName += ' <span class="founder-tag">Fundador</span>';
+          }
+          displayName += getVerificationIcon(data.email);
+          
+          // Actualizar perfil móvil
+          const profileUsername = document.getElementById('profile-username');
+          const profileFollowers = document.getElementById('profile-followers');
+          const profileFollowing = document.getElementById('profile-following');
+          
+          if (profileUsername) profileUsername.innerHTML = displayName;
+          if (profileFollowers) profileFollowers.textContent = formatNumber(data.followersCount || 0);
+          if (profileFollowing) profileFollowing.textContent = formatNumber(data.followingCount || 0);
+          
+          // Actualizar perfil desktop
+          const usernameDesktop = document.getElementById('profile-username-desktop');
+          const followersDesktop = document.getElementById('profile-followers-desktop');
+          const followingDesktop = document.getElementById('profile-following-desktop');
+          
+          if (usernameDesktop) usernameDesktop.innerHTML = displayName;
+          if (followersDesktop) followersDesktop.textContent = formatNumber(data.followersCount || 0);
+          if (followingDesktop) followingDesktop.textContent = formatNumber(data.followingCount || 0);
+          
+          if (data.bio) {
+            const bioElement = document.getElementById('profile-bio');
+            if (bioElement) bioElement.value = data.bio;
+          }
+          
+          if (data.profileImage) {
+            const profileImage = document.getElementById('profile-image');
+            const profileImageDesktop = document.getElementById('profile-image-desktop');
+            if (profileImage) profileImage.src = data.profileImage;
+            if (profileImageDesktop) profileImageDesktop.src = data.profileImage;
+          }
+          
+          // Cargar marco del perfil del usuario
+          loadUserFrame(user.uid, 'profile-frame');
+          loadUserFrame(user.uid, 'profile-frame-desktop');
+        }
+        
+        // Ejecutar otras inicializaciones
+        setTimeout(() => {
+          setupAutoDetectors();
+          updateBottomNavProfilePic();
+          loadUserProfile();
+        }, 300);
+      }).catch(error => {
+        console.error('Error al cargar datos del usuario:', error);
+      });
     } else {
       console.log('❌ Usuario no autenticado');
       clearUserState();
@@ -11588,78 +11603,7 @@ function saveNote() {
         return 'Error de autenticación. Intenta de nuevo';
     }
   }
-  firebase.auth().onAuthStateChanged(user => {
-    if (user) {
-      if (authorizedEmails.includes(user.email)) {
-        document.getElementById('live-transmit-btn').style.display = "block";
-      } else {
-        document.getElementById('live-transmit-btn').style.display = "none";
-      }
-      
-      // INICIALIZAR SISTEMA DE MONEDAS de manera consistente
-      updateCoinDisplay(user.uid);
-      
-      // CARGAR ESTADÍSTICAS EN TIEMPO REAL
-      loadUserStats(user.uid);
-      
-      firebase.database().ref('users/' + user.uid).once('value').then(snapshot => {
-        const data = snapshot.val();
-        if (data && data.blocked && data.blockedUntil && Date.now() < data.blockedUntil) {
-          alert("Tu cuenta ha sido bloqueada por infracciones. Por favor, contacta con el soporte para recuperar el acceso.");
-          firebase.auth().signOut();
-          return;
-        }
-        authFormContainer.classList.add('hidden');
-        mainApp.classList.remove('hidden');
-        loadStories();
-        loadUserStories(user.uid);
-        loadSuggestedStories();
-        loadFeaturedAuthors();
-        
-        // INICIALIZAR SISTEMA DE MONEDAS
-        updateCoinDisplay(user.uid);
-        
-        if (data) {
-          let displayName = data.username || "Usuario";
-          if (data.founder) {
-            displayName += ' <span class="founder-tag">Fundador</span>';
-          }
-          displayName += getVerificationIcon(data.email);
-          
-          // Actualizar perfil móvil
-          document.getElementById('profile-username').innerHTML = displayName;
-          document.getElementById('profile-followers').textContent = formatNumber(data.followersCount || 0);
-          document.getElementById('profile-following').textContent = formatNumber(data.followingCount || 0);
-          
-          // Actualizar perfil desktop
-          const usernameDesktop = document.getElementById('profile-username-desktop');
-          const followersDesktop = document.getElementById('profile-followers-desktop');
-          const followingDesktop = document.getElementById('profile-following-desktop');
-          
-          if (usernameDesktop) usernameDesktop.innerHTML = displayName;
-          if (followersDesktop) followersDesktop.textContent = formatNumber(data.followersCount || 0);
-          if (followingDesktop) followingDesktop.textContent = formatNumber(data.followingCount || 0);
-          
-          if (data.bio) {
-            const bioElement = document.getElementById('profile-bio');
-            if (bioElement) bioElement.value = data.bio;
-          }
-          if (data.profileImage) {
-            document.getElementById('profile-image').src = data.profileImage;
-            const profileImageDesktop = document.getElementById('profile-image-desktop');
-            if (profileImageDesktop) profileImageDesktop.src = data.profileImage;
-          }
-          
-          // Cargar marco del perfil del usuario
-          loadUserFrame(user.uid, 'profile-frame');
-          loadUserFrame(user.uid, 'profile-frame-desktop');
-        }
-      });
-    } else {
-      authFormContainer.classList.remove('hidden');
-      mainApp.classList.add('hidden');
-    }
-  });
+  // LISTENER DUPLICADO REMOVIDO - La funcionalidad ahora está en initializeAuthListener() (línea 5809)
   /*********************** AUTENTICACIÓN CON GOOGLE Y FACEBOOK **************************/
   function signInWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
