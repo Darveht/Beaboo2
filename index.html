@@ -3111,7 +3111,7 @@ function formatTimestamp(timestamp) {
     <div class="mt-6 text-center space-y-4 max-w-lg mx-auto">
       <a
         href="#"
-        onclick="resetPassword()"
+        onclick="if(typeof resetPassword === 'function') resetPassword(); return false;"
         class="block text-sm text-gray-600 hover:text-[#FE2C55] transition"
       >
         ¿Olvidaste tu contraseña?
@@ -3757,7 +3757,7 @@ function clearPinStatus() {
 </script>
 
 <!-- APLICACIÓN PRINCIPAL ESTILO TIKTOK (MODO CLARO) -->
-<div id="main-app" class="h-screen flex flex-col bg-white font-sans text-black">
+<div id="main-app" class="hidden h-screen flex flex-col bg-white font-sans text-black">
   <!-- BARRA SUPERIOR CON NOMBRE + ICONOS -->
   <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 sticky top-0 z-50 bg-white">
     <img src="https://i.ibb.co/RTS0yszd/IMG-3883.png" alt="BeaBoo" class="h-12 w-auto" id="app-logo"></img>
@@ -5761,13 +5761,23 @@ function initializeAuthListener() {
     const authFormContainer = document.getElementById('auth-form');
     const mainApp = document.getElementById('main-app');
     
+    // Función helper para resetear el botón de login si algo falla
+    const resetLoginButton = () => {
+      const submitBtn = document.getElementById('submitButton');
+      if (submitBtn && submitBtn.disabled) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Iniciar Sesión';
+      }
+    };
+    
     if (user) {
       console.log('✅ Usuario autenticado:', user.email);
       
       // Verificar si está autorizado para transmisión en vivo
       const liveTransmitBtn = document.getElementById('live-transmit-btn');
       if (liveTransmitBtn) {
-        if (authorizedEmails.includes(user.email)) {
+        // Verificar si authorizedEmails existe antes de usarlo
+        if (typeof authorizedEmails !== 'undefined' && authorizedEmails.includes(user.email)) {
           liveTransmitBtn.style.display = "block";
         } else {
           liveTransmitBtn.style.display = "none";
@@ -5775,10 +5785,14 @@ function initializeAuthListener() {
       }
       
       // INICIALIZAR SISTEMA DE MONEDAS
-      updateCoinDisplay(user.uid);
+      if (typeof updateCoinDisplay === 'function') {
+        updateCoinDisplay(user.uid);
+      }
       
       // CARGAR ESTADÍSTICAS EN TIEMPO REAL
-      loadUserStats(user.uid);
+      if (typeof loadUserStats === 'function') {
+        loadUserStats(user.uid);
+      }
       
       // Verificar si el usuario está bloqueado
       firebase.database().ref('users/' + user.uid).once('value').then(snapshot => {
@@ -5786,8 +5800,12 @@ function initializeAuthListener() {
         if (data && data.blocked && data.blockedUntil && Date.now() < data.blockedUntil) {
           alert("Tu cuenta ha sido bloqueada por infracciones. Por favor, contacta con el soporte para recuperar el acceso.");
           firebase.auth().signOut();
+          resetLoginButton();
           return;
         }
+        
+        // Resetear botón de login después de autenticación exitosa
+        resetLoginButton();
         
         // Mostrar app principal
         if (authFormContainer && mainApp) {
@@ -5795,16 +5813,16 @@ function initializeAuthListener() {
           mainApp.classList.remove('hidden');
         }
         
-        // Cargar contenido de la app
-        loadStories();
-        loadUserStories(user.uid);
-        loadSuggestedStories();
-        loadFeaturedAuthors();
-        loadNewReleases();
-        loadTop10();
-        loadPopularStories();
-        loadTerrorStories();
-        loadFollowingStories();
+        // Cargar contenido de la app (solo si las funciones están definidas)
+        if (typeof loadStories === 'function') loadStories();
+        if (typeof loadUserStories === 'function') loadUserStories(user.uid);
+        if (typeof loadSuggestedStories === 'function') loadSuggestedStories();
+        if (typeof loadFeaturedAuthors === 'function') loadFeaturedAuthors();
+        if (typeof loadNewReleases === 'function') loadNewReleases();
+        if (typeof loadTop10 === 'function') loadTop10();
+        if (typeof loadPopularStories === 'function') loadPopularStories();
+        if (typeof loadTerrorStories === 'function') loadTerrorStories();
+        if (typeof loadFollowingStories === 'function') loadFollowingStories();
         
         // Actualizar perfil del usuario
         if (data) {
@@ -5812,7 +5830,9 @@ function initializeAuthListener() {
           if (data.founder) {
             displayName += ' <span class="founder-tag">Fundador</span>';
           }
-          displayName += getVerificationIcon(data.email);
+          if (typeof getVerificationIcon === 'function') {
+            displayName += getVerificationIcon(data.email);
+          }
           
           // Actualizar perfil móvil
           const profileUsername = document.getElementById('profile-username');
@@ -5845,22 +5865,28 @@ function initializeAuthListener() {
           }
           
           // Cargar marco del perfil del usuario
-          loadUserFrame(user.uid, 'profile-frame');
-          loadUserFrame(user.uid, 'profile-frame-desktop');
+          if (typeof loadUserFrame === 'function') {
+            loadUserFrame(user.uid, 'profile-frame');
+            loadUserFrame(user.uid, 'profile-frame-desktop');
+          }
         }
         
         // Ejecutar otras inicializaciones
         setTimeout(() => {
-          setupAutoDetectors();
-          updateBottomNavProfilePic();
-          loadUserProfile();
+          if (typeof setupAutoDetectors === 'function') setupAutoDetectors();
+          if (typeof updateBottomNavProfilePic === 'function') updateBottomNavProfilePic();
+          if (typeof loadUserProfile === 'function') loadUserProfile();
         }, 300);
       }).catch(error => {
         console.error('Error al cargar datos del usuario:', error);
+        resetLoginButton();
+        showAuthError('Error al cargar datos del usuario');
       });
     } else {
       console.log('❌ Usuario no autenticado');
-      clearUserState();
+      if (typeof clearUserState === 'function') {
+        clearUserState();
+      }
       
       // Mostrar formulario de autenticación
       if (authFormContainer && mainApp) {
