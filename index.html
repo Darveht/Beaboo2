@@ -2192,7 +2192,7 @@
   <!-- Contenedor de video vertical -->
   <div id="video-container" class="h-full w-full flex items-center justify-center relative">
     <!-- Video -->
-    <video id="newhot-video" class="h-full w-auto max-w-full object-contain" controls playsinline loop autoplay muted>
+    <video id="newhot-video" class="h-full w-auto max-w-full object-contain" controls playsinline loop muted>
       <source src="https://www.dropbox.com/scl/fi/zj06scl4l4etg6ij60r3j/copy_8FBD68E3-DA2B-46A2-8D0F-2A20EE10AF5F.mov?rlkey=o9dzugdhfdfljcnrjkw5rueex&st=hkttv9my&raw=1" type="video/mp4">
       Tu navegador no soporta el elemento de video.
     </video>
@@ -2927,12 +2927,20 @@ function openNewHot() {
     newHotView.classList.remove('hidden');
     mainApp.classList.add('hidden');
     
-    // Reproducir automáticamente cuando se abre la vista
+    // Cargar y reproducir el video
+    video.load();
+    
+    // Intentar reproducir después de cargar
     setTimeout(() => {
-      video.play().catch(error => {
-        console.log('Autoplay bloqueado, el usuario debe interactuar:', error);
+      video.play().then(() => {
+        console.log('Video reproduciendo correctamente');
+      }).catch(error => {
+        console.log('Error al reproducir:', error);
+        // Intentar sin sonido si falla
+        video.muted = true;
+        video.play();
       });
-    }, 100);
+    }, 300);
   }
 }
 
