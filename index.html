@@ -9,10 +9,9 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4653147807800151" crossorigin="anonymous"></script>
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
-  <!-- Tailwind CSS completo con gradientes (optimizado para no bloquear) -->
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    // Configuración de Tailwind optimizada - incluye gradientes sin bloqueos
     tailwind.config = {
       theme: {
         extend: {
@@ -24,11 +23,7 @@
             }
           }
         }
-      },
-      // Configuración que evita scanning aggressive (previene bloqueos)
-      content: [],
-      // Separador de clases simple para evitar regex complejos
-      separator: ':'
+      }
     }
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1557,22 +1552,19 @@
     }
   </style>
   <script>
-    /*********************** SISTEMA DE GESTIÓN DE FIREBASE (PREVIENE DUPLICADOS) ***********************/
+    /*********************** SISTEMA DE GESTIÓN DE FIREBASE ***********************/
     let firebaseListeners = {
       authListener: null,
       databaseListeners: new Map(),
       initialized: false
     };
 
-    // Sistema unificado de autenticación (elimina duplicados)
     function initializeFirebaseAuth() {
       if (firebaseListeners.authListener) {
-        // Desconectar listener anterior si existe
         firebaseListeners.authListener();
         firebaseListeners.authListener = null;
       }
       
-      // Crear un solo listener de autenticación
       firebaseListeners.authListener = firebase.auth().onAuthStateChanged(user => {
         handleAuthStateChange(user);
       });
@@ -1618,18 +1610,15 @@
       return unsubscribe;
     }
 
-    // Sistema de gestión de intervals (PREVIENE MEMORY LEAKS)
     let activeIntervals = new Map();
     
-    function setIntervalManaged(callback, delay, id = null) {
-      const intervalId = id || Date.now() + Math.random();
+    function setIntervalManaged(callback, delay, id) {
+      const intervalId = id || Date.now();
       
-      // Limpiar interval anterior si existe
       if (activeIntervals.has(intervalId)) {
         clearInterval(activeIntervals.get(intervalId));
       }
       
-      // Crear nuevo interval
       const interval = setInterval(callback, delay);
       activeIntervals.set(intervalId, interval);
       
@@ -1645,16 +1634,11 @@
       return false;
     }
     
-    // Limpiar todos los intervals al cambiar página/usuario
     function clearAllIntervals() {
       activeIntervals.forEach(interval => clearInterval(interval));
       activeIntervals.clear();
     }
 
-    /*********************** BLOQUEO DE ACCESO EN COMPUTADORAS (Móvil obligatorio) ***********************/
-    function esDispositivoMovil() {
-      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    }
     /*********************** MODO OFFLINE ***********************/
     window.addEventListener('offline', function() {
       document.body.innerHTML = `
