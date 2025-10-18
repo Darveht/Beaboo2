@@ -3019,7 +3019,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <!-- APLICACIÓN PRINCIPAL ESTILO TIKTOK (MODO CLARO) -->
-<div id="main-app" class="h-screen flex flex-col bg-white font-sans text-black">
+<div id="main-app" class="h-screen flex flex-col bg-white font-sans text-black hidden">
   <!-- BARRA SUPERIOR CON NOMBRE + ICONOS -->
   <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 sticky top-0 z-50 bg-white">
     <!-- Botón de menú de categorías (izquierda) -->
@@ -3071,8 +3071,8 @@ document.addEventListener('DOMContentLoaded', function() {
     <!-- Overlay oscuro -->
     <div class="absolute inset-0 bg-black bg-opacity-50 transition-opacity" onclick="toggleCategoriesMenu()"></div>
     
-    <!-- Panel lateral -->
-    <div class="absolute left-0 top-0 bottom-0 w-80 bg-white shadow-2xl transform transition-transform duration-300 overflow-y-auto">
+    <!-- Panel de categorías a pantalla completa -->
+    <div class="absolute inset-0 bg-white transform transition-transform duration-300 overflow-y-auto">
       <!-- Header del menú -->
       <div class="sticky top-0 bg-gradient-to-r from-[#FE2C55] to-[#ff6b7a] p-6 text-white">
         <div class="flex items-center justify-between mb-2">
@@ -3094,133 +3094,109 @@ document.addEventListener('DOMContentLoaded', function() {
       <!-- Lista de categorías -->
       <div class="p-4 space-y-2">
         <!-- Todas las categorías -->
-        <button onclick="filterByCategory('all')" class="category-item w-full text-left px-4 py-3 rounded-xl hover:bg-pink-50 transition-all flex items-center space-x-3 group">
-          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white text-xl">
-            ✨
-          </div>
+        <button onclick="filterByCategory('all')" class="category-item w-full text-left px-4 py-4 rounded-xl hover:bg-pink-50 transition-all flex items-center space-x-3 group border-2 border-transparent hover:border-[#FE2C55]">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center"></div>
           <div class="flex-1">
-            <h3 class="font-bold text-gray-800 group-hover:text-[#FE2C55]">Todas las Historias</h3>
+            <h3 class="font-bold text-gray-800 group-hover:text-[#FE2C55] text-lg">Todas las Historias</h3>
             <p class="text-xs text-gray-500">Ver todo el contenido</p>
           </div>
         </button>
 
         <!-- Fanfic -->
-        <button onclick="filterByCategory('fanfic')" class="category-item w-full text-left px-4 py-3 rounded-xl hover:bg-pink-50 transition-all flex items-center space-x-3 group">
-          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-400 flex items-center justify-center text-white text-xl">
-            ⭐
-          </div>
+        <button onclick="filterByCategory('fanfic')" class="category-item w-full text-left px-4 py-4 rounded-xl hover:bg-pink-50 transition-all flex items-center space-x-3 group border-2 border-transparent hover:border-[#FE2C55]">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-400 flex items-center justify-center"></div>
           <div class="flex-1">
-            <h3 class="font-bold text-gray-800 group-hover:text-[#FE2C55]">Fan Fiction</h3>
+            <h3 class="font-bold text-gray-800 group-hover:text-[#FE2C55] text-lg">Fan Fiction</h3>
             <p class="text-xs text-gray-500">Historias de tus personajes favoritos</p>
           </div>
         </button>
 
         <!-- Romance -->
-        <button onclick="filterByCategory('romance')" class="category-item w-full text-left px-4 py-3 rounded-xl hover:bg-pink-50 transition-all flex items-center space-x-3 group">
-          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-pink-400 to-red-400 flex items-center justify-center text-white text-xl">
-            💕
-          </div>
+        <button onclick="filterByCategory('romance')" class="category-item w-full text-left px-4 py-4 rounded-xl hover:bg-pink-50 transition-all flex items-center space-x-3 group border-2 border-transparent hover:border-[#FE2C55]">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-pink-400 to-red-400 flex items-center justify-center"></div>
           <div class="flex-1">
-            <h3 class="font-bold text-gray-800 group-hover:text-[#FE2C55]">Romance</h3>
+            <h3 class="font-bold text-gray-800 group-hover:text-[#FE2C55] text-lg">Romance</h3>
             <p class="text-xs text-gray-500">Historias de amor y pasión</p>
           </div>
         </button>
 
         <!-- Comedia -->
-        <button onclick="filterByCategory('comedia')" class="category-item w-full text-left px-4 py-3 rounded-xl hover:bg-pink-50 transition-all flex items-center space-x-3 group">
-          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-orange-400 flex items-center justify-center text-white text-xl">
-            😂
-          </div>
+        <button onclick="filterByCategory('comedia')" class="category-item w-full text-left px-4 py-4 rounded-xl hover:bg-pink-50 transition-all flex items-center space-x-3 group border-2 border-transparent hover:border-[#FE2C55]">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-orange-400 flex items-center justify-center"></div>
           <div class="flex-1">
-            <h3 class="font-bold text-gray-800 group-hover:text-[#FE2C55]">Comedia</h3>
+            <h3 class="font-bold text-gray-800 group-hover:text-[#FE2C55] text-lg">Comedia</h3>
             <p class="text-xs text-gray-500">Historias divertidas y entretenidas</p>
           </div>
         </button>
 
         <!-- Terror -->
-        <button onclick="filterByCategory('terror')" class="category-item w-full text-left px-4 py-3 rounded-xl hover:bg-pink-50 transition-all flex items-center space-x-3 group">
-          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white text-xl">
-            👻
-          </div>
+        <button onclick="filterByCategory('terror')" class="category-item w-full text-left px-4 py-4 rounded-xl hover:bg-pink-50 transition-all flex items-center space-x-3 group border-2 border-transparent hover:border-[#FE2C55]">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center"></div>
           <div class="flex-1">
-            <h3 class="font-bold text-gray-800 group-hover:text-[#FE2C55]">Terror</h3>
+            <h3 class="font-bold text-gray-800 group-hover:text-[#FE2C55] text-lg">Terror</h3>
             <p class="text-xs text-gray-500">Historias de miedo y suspenso</p>
           </div>
         </button>
 
         <!-- Aventura -->
-        <button onclick="filterByCategory('aventura')" class="category-item w-full text-left px-4 py-3 rounded-xl hover:bg-pink-50 transition-all flex items-center space-x-3 group">
-          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-teal-400 flex items-center justify-center text-white text-xl">
-            🗺️
-          </div>
+        <button onclick="filterByCategory('aventura')" class="category-item w-full text-left px-4 py-4 rounded-xl hover:bg-pink-50 transition-all flex items-center space-x-3 group border-2 border-transparent hover:border-[#FE2C55]">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-teal-400 flex items-center justify-center"></div>
           <div class="flex-1">
-            <h3 class="font-bold text-gray-800 group-hover:text-[#FE2C55]">Aventura</h3>
+            <h3 class="font-bold text-gray-800 group-hover:text-[#FE2C55] text-lg">Aventura</h3>
             <p class="text-xs text-gray-500">Historias épicas y emocionantes</p>
           </div>
         </button>
 
         <!-- Fantasía -->
-        <button onclick="filterByCategory('fantasia')" class="category-item w-full text-left px-4 py-3 rounded-xl hover:bg-pink-50 transition-all flex items-center space-x-3 group">
-          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-white text-xl">
-            🔮
-          </div>
+        <button onclick="filterByCategory('fantasia')" class="category-item w-full text-left px-4 py-4 rounded-xl hover:bg-pink-50 transition-all flex items-center space-x-3 group border-2 border-transparent hover:border-[#FE2C55]">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center"></div>
           <div class="flex-1">
-            <h3 class="font-bold text-gray-800 group-hover:text-[#FE2C55]">Fantasía</h3>
+            <h3 class="font-bold text-gray-800 group-hover:text-[#FE2C55] text-lg">Fantasía</h3>
             <p class="text-xs text-gray-500">Mundos mágicos y sobrenaturales</p>
           </div>
         </button>
 
         <!-- Ciencia Ficción -->
-        <button onclick="filterByCategory('ciencia-ficcion')" class="category-item w-full text-left px-4 py-3 rounded-xl hover:bg-pink-50 transition-all flex items-center space-x-3 group">
-          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-white text-xl">
-            🚀
-          </div>
+        <button onclick="filterByCategory('ciencia-ficcion')" class="category-item w-full text-left px-4 py-4 rounded-xl hover:bg-pink-50 transition-all flex items-center space-x-3 group border-2 border-transparent hover:border-[#FE2C55]">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center"></div>
           <div class="flex-1">
-            <h3 class="font-bold text-gray-800 group-hover:text-[#FE2C55]">Ciencia Ficción</h3>
+            <h3 class="font-bold text-gray-800 group-hover:text-[#FE2C55] text-lg">Ciencia Ficción</h3>
             <p class="text-xs text-gray-500">Futurismo y tecnología</p>
           </div>
         </button>
 
         <!-- Drama -->
-        <button onclick="filterByCategory('drama')" class="category-item w-full text-left px-4 py-3 rounded-xl hover:bg-pink-50 transition-all flex items-center space-x-3 group">
-          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-red-400 to-pink-400 flex items-center justify-center text-white text-xl">
-            🎭
-          </div>
+        <button onclick="filterByCategory('drama')" class="category-item w-full text-left px-4 py-4 rounded-xl hover:bg-pink-50 transition-all flex items-center space-x-3 group border-2 border-transparent hover:border-[#FE2C55]">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-red-400 to-pink-400 flex items-center justify-center"></div>
           <div class="flex-1">
-            <h3 class="font-bold text-gray-800 group-hover:text-[#FE2C55]">Drama</h3>
+            <h3 class="font-bold text-gray-800 group-hover:text-[#FE2C55] text-lg">Drama</h3>
             <p class="text-xs text-gray-500">Historias intensas y emotivas</p>
           </div>
         </button>
 
         <!-- Misterio -->
-        <button onclick="filterByCategory('misterio')" class="category-item w-full text-left px-4 py-3 rounded-xl hover:bg-pink-50 transition-all flex items-center space-x-3 group">
-          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xl">
-            🔍
-          </div>
+        <button onclick="filterByCategory('misterio')" class="category-item w-full text-left px-4 py-4 rounded-xl hover:bg-pink-50 transition-all flex items-center space-x-3 group border-2 border-transparent hover:border-[#FE2C55]">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center"></div>
           <div class="flex-1">
-            <h3 class="font-bold text-gray-800 group-hover:text-[#FE2C55]">Misterio</h3>
+            <h3 class="font-bold text-gray-800 group-hover:text-[#FE2C55] text-lg">Misterio</h3>
             <p class="text-xs text-gray-500">Enigmas y detectives</p>
           </div>
         </button>
 
         <!-- Acción -->
-        <button onclick="filterByCategory('accion')" class="category-item w-full text-left px-4 py-3 rounded-xl hover:bg-pink-50 transition-all flex items-center space-x-3 group">
-          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-white text-xl">
-            💥
-          </div>
+        <button onclick="filterByCategory('accion')" class="category-item w-full text-left px-4 py-4 rounded-xl hover:bg-pink-50 transition-all flex items-center space-x-3 group border-2 border-transparent hover:border-[#FE2C55]">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center"></div>
           <div class="flex-1">
-            <h3 class="font-bold text-gray-800 group-hover:text-[#FE2C55]">Acción</h3>
+            <h3 class="font-bold text-gray-800 group-hover:text-[#FE2C55] text-lg">Acción</h3>
             <p class="text-xs text-gray-500">Adrenalina y peleas épicas</p>
           </div>
         </button>
 
         <!-- Histórico -->
-        <button onclick="filterByCategory('historico')" class="category-item w-full text-left px-4 py-3 rounded-xl hover:bg-pink-50 transition-all flex items-center space-x-3 group">
-          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-amber-600 to-yellow-700 flex items-center justify-center text-white text-xl">
-            📜
-          </div>
+        <button onclick="filterByCategory('historico')" class="category-item w-full text-left px-4 py-4 rounded-xl hover:bg-pink-50 transition-all flex items-center space-x-3 group border-2 border-transparent hover:border-[#FE2C55]">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-br from-amber-600 to-yellow-700 flex items-center justify-center"></div>
           <div class="flex-1">
-            <h3 class="font-bold text-gray-800 group-hover:text-[#FE2C55]">Histórico</h3>
+            <h3 class="font-bold text-gray-800 group-hover:text-[#FE2C55] text-lg">Histórico</h3>
             <p class="text-xs text-gray-500">Viajes al pasado</p>
           </div>
         </button>
